@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # 360 Auth Magician
+  auth-magician:
+    build: ./services/auth-magician
+    ports:
+      - "8001:8080"
+    environment:
+      - MAGICIAN_TYPE=auth
+      - MAGIC_LEVEL=grandmaster
+      - DEAF_OPTIMIZED=true
+      - GCP_PROJECT_ID=magicians-360-platform
+    volumes:
+      - ./models/sign-language:/app/models
+    networks:
+      - magicians-network
+
+  # 360 Sync Magician  
+  sync-magician:
+    build: ./services/sync-magician
+    ports:
+      - "8002:8080"
+    environment:
+      - MAGICIAN_TYPE=sync
+      - MAGIC_LEVEL=master
+      - PINKSYNC_ENABLED=true
+      - OFFLINE_FIRST=true
+    networks:
+      - magicians-network
+
+  # 360 Neural Magician
+  neural-magician:
+    build: ./services/neural-magician
+    ports:
+      - "8003:8080"
+    environment:
+      - MAGICIAN_TYPE=neural
+      - MAGIC_LEVEL=grandmaster
+      - AI_MODELS_PATH=/app/models
+      - FIBONROSE_ENABLED=true
+    volumes:
+      - ./models/neural:/app/models
+    networks:
+      - magicians-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # 360 Business Magician
+  business-magician:
+    build: ./services/business-magician
+    ports:
+      - "8004:8080"
+    environment:
+      - MAGICIAN_TYPE=business
+      - MAGIC_LEVEL=master
+      - CLOUD_PROVIDERS=gcp,vercel
+      - AUTOMATION_LEVEL=full_magic
+    networks:
+      - magicians-network
+
+  # 360 Job Magician
+  job-magician:
+    build: ./services/job-magician
+    ports:
+      - "8005:8080"
+    environment:
+      - MAGICIAN_TYPE=job
+      - MAGIC_LEVEL=master
+      - DEAF_JOBS_FOCUS=true
+      - JOB_MATCHING_AI=enabled
+      - RESUME_MAGIC=enabled
+      - INTERVIEW_PREP=enabled
+    networks:
+      - magicians-network
+
+  # 360 Community Magician
+  community-magician:
+    build: ./services/community-magician
+    ports:
+      - "8006:8080"
+    environment:
+      - MAGICIAN_TYPE=community
+      - MAGIC_LEVEL=master
+      - DEAF_COMMUNITY_FOCUS=true
+    networks:
+      - magicians-network
+
+  # API Gateway - The Magic Portal
+  magic-portal:
+    build: ./gateway
+    ports:
+      - "8000:8080"
+    environment:
+      - PLATFORM_NAME=360 Magicians Platform
+      - AUTH_MAGICIAN_URL=http://auth-magician:8080
+      - SYNC_MAGICIAN_URL=http://sync-magician:8080
+      - NEURAL_MAGICIAN_URL=http://neural-magician:8080
+      - BUSINESS_MAGICIAN_URL=http://business-magician:8080
+      - JOB_MAGICIAN_URL=http://job-magician:8080
+      - COMMUNITY_MAGICIAN_URL=http://community-magician:8080
+    depends_on:
+      - auth-magician
+      - sync-magician
+      - neural-magician
+      - business-magician
+      - job-magician
+      - community-magician
+    networks:
+      - magicians-network
+
+  # Redis - Magic Cache
+  magic-cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - magicians-network
+
+  # PostgreSQL - Magic Database
+  magic-database:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=magicians_platform
+      - POSTGRES_USER=magician
+      - POSTGRES_PASSWORD=${MAGIC_DB_PASSWORD}
+    volumes:
+      - magic_data:/var/lib/postgresql/data
+    networks:
+      - magicians-network
+
+networks:
+  magicians-network:
+    driver: bridge
+
+volumes:
+  magic_data:

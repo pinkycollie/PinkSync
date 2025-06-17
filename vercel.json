@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "name": "pinksync-unified-platform",
+  "builds": [
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "frontend/**/*",
+      "use": "@vercel/static-build",
+      "config": {
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/v2/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ],
+  "env": {
+    "PINKSYNC_API_URL": "@pinksync-api-url",
+    "DEAFAUTH_ENDPOINT": "@deafauth-endpoint",
+    "FIBONROSE_ENDPOINT": "@fibonrose-endpoint",
+    "BUSINESS_MAGICIAN_ENDPOINT": "@business-magician-endpoint",
+    "GCP_PROJECT_ID": "auth-458419",
+    "NEXT_PUBLIC_DEAF_FIRST": "true"
+  },
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-PinkSync-Key"
+        }
+      ]
+    }
+  ]
+}

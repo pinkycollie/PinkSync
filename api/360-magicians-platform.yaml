@@ -1,0 +1,453 @@
+openapi: 3.0.0
+info:
+  title: 360 Magicians Platform API
+  version: 2.0.0
+  description: Comprehensive deaf-first business platform - Where Technology Meets Magic
+servers:
+  - url: https://api.360magicians.com/v2
+    description: Production Environment
+  - url: https://staging-api.360magicians.com/v2
+    description: Staging Environment
+
+security:
+  - MagicianAuth: []
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    MagicianAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.360magicians.com/oauth/authorize
+          tokenUrl: https://auth.360magicians.com/oauth/token
+          scopes:
+            auth_magician: Authentication magic access
+            sync_magician: Data synchronization magic
+            neural_magician: AI processing magic
+            business_magician: Business automation magic
+            job_magician: Job placement and opportunities magic
+            community_magician: Deaf community magic
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Magician-Key
+
+  schemas:
+    MagicianProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        magician_id:
+          type: string
+          description: "Unique 360 Magicians identifier"
+        deaf_identity:
+          type: object
+          properties:
+            primary_sign_language:
+              type: string
+              enum: [ASL, BSL, ISL, LSF, DGS, JSL, Other]
+            fluency_level:
+              type: string
+              enum: [native, fluent, intermediate, beginner]
+            cultural_involvement:
+              type: string
+              enum: [high, medium, low]
+            communication_preferences:
+              type: array
+              items:
+                type: string
+        job_profile:
+          type: object
+          properties:
+            current_status:
+              type: string
+              enum: [seeking, employed, freelancing, entrepreneur, student]
+            experience_level:
+              type: string
+              enum: [entry, mid, senior, executive, expert]
+            industry_preferences:
+              type: array
+              items:
+                type: string
+            job_type_preferences:
+              type: array
+              items:
+                type: string
+                enum: [full_time, part_time, contract, remote, hybrid, on_site]
+            salary_expectations:
+              type: object
+              properties:
+                min_salary:
+                  type: number
+                max_salary:
+                  type: number
+                currency:
+                  type: string
+                  default: USD
+        magic_preferences:
+          type: object
+          properties:
+            automation_level:
+              type: string
+              enum: [basic, advanced, full_magic]
+            visual_style:
+              type: string
+              enum: [minimal, standard, high_contrast, custom]
+            notification_style:
+              type: string
+              enum: [visual, haptic, combined]
+
+    JobOpportunity:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        job_type:
+          type: string
+          enum: [full_time, part_time, contract, remote, hybrid, on_site]
+        deaf_accessibility_rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        sign_language_support:
+          type: boolean
+        accommodation_features:
+          type: array
+          items:
+            type: string
+        required_skills:
+          type: array
+          items:
+            type: string
+        salary_range:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            currency:
+              type: string
+        magic_match_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: "AI-powered job match score"
+
+paths:
+  # 360 Auth Magician Endpoints
+  /auth-magician/sign-language:
+    post:
+      summary: Magical sign language authentication
+      tags: [Auth Magician]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+                magician_id:
+                  type: string
+      responses:
+        '200':
+          description: Authentication magic successful
+
+  # 360 Sync Magician Endpoints
+  /sync-magician/context:
+    post:
+      summary: Magical context synchronization
+      tags: [Sync Magician]
+      security:
+        - MagicianAuth: [sync_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain:
+                  type: string
+                  enum: [business, jobs, community, personal]
+                context_data:
+                  type: object
+                magic_priority:
+                  type: string
+                  enum: [low, medium, high, urgent]
+      responses:
+        '200':
+          description: Context magically synchronized
+
+  # 360 Neural Magician Endpoints
+  /neural-magician/process:
+    post:
+      summary: AI-powered magical processing
+      tags: [Neural Magician]
+      security:
+        - MagicianAuth: [neural_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                processor_type:
+                  type: string
+                  enum: [sign_recognition, job_matching, business_analysis, accessibility_optimization]
+                input_data:
+                  type: object
+                magic_enhancement:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Magical processing completed
+
+  # 360 Business Magician Endpoints
+  /business-magician/setup:
+    post:
+      summary: Magical business infrastructure setup
+      tags: [Business Magician]
+      security:
+        - MagicianAuth: [business_magician]
+      responses:
+        '201':
+          description: Business magic activated
+
+  # 360 Job Magician Endpoints
+  /job-magician/opportunities:
+    get:
+      summary: Discover magical job opportunities
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      parameters:
+        - name: deaf_friendly_only
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: sign_language_preferred
+          in: query
+          schema:
+            type: string
+        - name: experience_level
+          in: query
+          schema:
+            type: string
+            enum: [entry, mid, senior, executive, expert]
+        - name: job_type
+          in: query
+          schema:
+            type: string
+            enum: [full_time, part_time, contract, remote, hybrid, on_site]
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: salary_min
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Magical job opportunities discovered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opportunities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JobOpportunity'
+                  total_count:
+                    type: integer
+                  magic_recommendations:
+                    type: array
+                    items:
+                      type: string
+
+  /job-magician/apply:
+    post:
+      summary: Magically apply to job opportunities
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: string
+                cover_letter:
+                  type: string
+                resume_version:
+                  type: string
+                accommodation_requests:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Job application magically submitted
+
+  /job-magician/profile:
+    post:
+      summary: Create magical job seeker profile
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicianProfile'
+      responses:
+        '201':
+          description: Job magic profile created
+
+    get:
+      summary: Get job seeker profile
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      responses:
+        '200':
+          description: Job profile retrieved
+
+  /job-magician/resume:
+    post:
+      summary: Generate magical resume
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_style:
+                  type: string
+                  enum: [professional, creative, technical, executive]
+                deaf_accommodations_highlight:
+                  type: boolean
+                  default: true
+                sign_language_skills:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: Magical resume generated
+
+  /job-magician/interview-prep:
+    post:
+      summary: Magical interview preparation
+      tags: [Job Magician]
+      security:
+        - MagicianAuth: [job_magician]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: string
+                interview_type:
+                  type: string
+                  enum: [phone, video, in_person, panel]
+                accommodation_needs:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Interview magic preparation ready
+
+  # 360 Community Magician Endpoints
+  /community-magician/connect:
+    post:
+      summary: Magical community connections
+      tags: [Community Magician]
+      security:
+        - MagicianAuth: [community_magician]
+      responses:
+        '200':
+          description: Magical connections established
+
+  # Platform Management
+  /magicians/status:
+    get:
+      summary: Check all magicians status
+      tags: [Platform]
+      responses:
+        '200':
+          description: All magicians status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  platform_status:
+                    type: string
+                  magicians:
+                    type: object
+                    properties:
+                      auth_magician:
+                        type: string
+                      sync_magician:
+                        type: string
+                      neural_magician:
+                        type: string
+                      business_magician:
+                        type: string
+                      job_magician:
+                        type: string
+                      community_magician:
+                        type: string
+                  magic_level:
+                    type: string
+                    enum: [apprentice, journeyman, master, grandmaster]
+
+tags:
+  - name: Auth Magician
+    description: Magical authentication and identity services
+  - name: Sync Magician
+    description: Magical data synchronization and offline capabilities
+  - name: Neural Magician
+    description: AI-powered magical processing
+  - name: Business Magician
+    description: Magical business automation and cloud services
+  - name: Job Magician
+    description: Magical job opportunities and placement services
+  - name: Community Magician
+    description: Magical deaf community connections
+  - name: Platform
+    description: Overall platform management and monitoring

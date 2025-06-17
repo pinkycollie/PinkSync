@@ -1,0 +1,100 @@
+swagger: '2.0'
+info:
+  title: Deaf Authentication Platform API
+  description: API for accessibility-focused authentication and services
+  version: 1.0.0
+host: deaf-auth-api.endpoints.auth-458419.cloud.goog
+schemes:
+  - https
+produces:
+  - application/json
+
+paths:
+  /auth/sign-language:
+    post:
+      summary: Authenticate using sign language
+      operationId: signLanguageAuth
+      parameters:
+        - name: video
+          in: formData
+          type: file
+          required: true
+          description: Sign language video for authentication
+      responses:
+        200:
+          description: Authentication successful
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+              user_id:
+                type: string
+        401:
+          description: Authentication failed
+      x-google-backend:
+        address: https://sign-language-auth-[hash]-uc.a.run.app
+        protocol: h2
+
+  /accessibility/captions:
+    post:
+      summary: Generate real-time captions
+      operationId: generateCaptions
+      parameters:
+        - name: audio
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Captions generated
+          schema:
+            type: object
+            properties:
+              captions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                    timestamp:
+                      type: number
+      x-google-backend:
+        address: https://accessibility-api-[hash]-uc.a.run.app
+
+  /notifications/visual:
+    post:
+      summary: Send visual notification
+      operationId: sendVisualNotification
+      parameters:
+        - name: notification
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+              message:
+                type: string
+              type:
+                type: string
+                enum: [flash, vibration, visual_alert]
+      responses:
+        200:
+          description: Notification sent
+      x-google-backend:
+        address: https://us-central1-auth-458419.cloudfunctions.net/visual-notification
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: key
+    in: query
+  firebase:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: "https://securetoken.google.com/auth-458419"
+    x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"

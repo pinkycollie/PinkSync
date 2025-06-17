@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # DeafAuth Service
+  deafauth:
+    build: ./services/deafauth
+    ports:
+      - "8001:8080"
+    environment:
+      - GCP_PROJECT_ID=auth-458419
+      - FIRESTORE_DATABASE=(default)
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./models/sign-language:/app/models
+    networks:
+      - pinksync-network
+
+  # FibonRose Neural Processing
+  fibonrose:
+    build: ./services/fibonrose
+    ports:
+      - "8002:8080"
+    environment:
+      - NEURAL_MODELS_PATH=/app/models
+      - ADAPTATION_ENABLED=true
+      - LEARNING_RATE=0.01
+    volumes:
+      - ./models/neural:/app/models
+    networks:
+      - pinksync-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Business Magician API
+  business-magician:
+    build: ./services/business-magician
+    ports:
+      - "8003:8080"
+    environment:
+      - CLOUD_PROVIDERS=gcp,vercel
+      - AUTOMATION_LEVEL=enterprise
+      - DEAF_OPTIMIZATION=true
+    networks:
+      - pinksync-network
+
+  # API Gateway
+  api-gateway:
+    build: ./gateway
+    ports:
+      - "8000:8080"
+    environment:
+      - DEAFAUTH_URL=http://deafauth:8080
+      - FIBONROSE_URL=http://fibonrose:8080
+      - BUSINESS_MAGICIAN_URL=http://business-magician:8080
+    depends_on:
+      - deafauth
+      - fibonrose
+      - business-magician
+    networks:
+      - pinksync-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - pinksync-network
+
+  # PostgreSQL for structured data
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=pinksync
+      - POSTGRES_USER=pinksync
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pinksync-network
+
+networks:
+  pinksync-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
