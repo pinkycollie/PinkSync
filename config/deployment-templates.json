@@ -1,0 +1,60 @@
+{
+  "templates": {
+    "development": {
+      "description": "Local development environment",
+      "services": ["postgres", "redis", "vcode-api", "vcode-frontend"],
+      "monitoring": false,
+      "ssl": false,
+      "scaling": false
+    },
+    "staging": {
+      "description": "Staging environment for testing",
+      "services": ["postgres", "redis", "vcode-api", "vcode-frontend", "monitoring"],
+      "monitoring": true,
+      "ssl": true,
+      "scaling": false
+    },
+    "production": {
+      "description": "Production environment",
+      "services": ["postgres", "redis", "vcode-api", "vcode-frontend", "monitoring", "backup"],
+      "monitoring": true,
+      "ssl": true,
+      "scaling": true,
+      "backup": true,
+      "security": "enhanced"
+    }
+  },
+  "groq_models": {
+    "whisper-large-v3": {
+      "purpose": "Audio transcription",
+      "languages": ["en", "es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh"],
+      "accessibility": "deaf-optimized"
+    },
+    "llama-3.1-70b-versatile": {
+      "purpose": "General analysis and assistance",
+      "context_length": 131072,
+      "accessibility": "visual-first"
+    },
+    "mixtral-8x7b-32768": {
+      "purpose": "Technical discussions and code analysis",
+      "context_length": 32768,
+      "accessibility": "technical-optimized"
+    }
+  },
+  "accessibility_standards": {
+    "wcag_aaa": {
+      "contrast_ratio": "7:1",
+      "keyboard_navigation": true,
+      "screen_reader": true,
+      "captions": true,
+      "sign_language": true
+    },
+    "deaf_first": {
+      "visual_priority": "maximum",
+      "audio_dependency": "none",
+      "vibration_feedback": true,
+      "asl_interpretation": true,
+      "cultural_competency": true
+    }
+  }
+}
