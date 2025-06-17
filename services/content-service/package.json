@@ -1,0 +1,20 @@
+{
+  "name": "@deaf-first/content-service",
+  "version": "1.0.0",
+  "description": "Content Service - ASL Transcription and Visual Content Tools",
+  "main": "main.py",
+  "scripts": {
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8003",
+    "dev": "uvicorn main:app --reload --host 0.0.0.0 --port 8003",
+    "test": "pytest",
+    "transcription-test": "python scripts/test_asl_transcription.py"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["content-management", "asl-transcription", "visual-content"],
+  "content_features": {
+    "asl_transcription": true,
+    "visual_content_tools": true,
+    "deaf_creator_support": true
+  }
+}

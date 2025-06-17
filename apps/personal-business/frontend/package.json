@@ -1,0 +1,33 @@
+{
+  "name": "@deaf-first/personal-business-frontend",
+  "version": "1.0.0",
+  "description": "Personal Business Portal - Deaf Entrepreneur Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev -p 3004",
+    "build": "next build",
+    "start": "next start -p 3004",
+    "lint": "next lint",
+    "business-analytics": "node scripts/generate-visual-analytics.js"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@deaf-first/core": "workspace:*",
+    "@deaf-first/shared-components": "workspace:*",
+    "recharts": "^2.0.0",
+    "framer-motion": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["business-management", "deaf-entrepreneurs", "visual-analytics"],
+  "business_features": {
+    "visual_business_metrics": true,
+    "asl_business_resources": true,
+    "deaf_entrepreneur_network": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "VCode Assistant - Deaf-First Meeting Helper",
+  "version": "1.0.0",
+  "description": "Browser extension for VCode meeting assistance with Groq AI and accessibility features",
+
+  "permissions": ["activeTab", "storage", "microphone", "notifications", "scripting"],
+
+  "host_permissions": [
+    "https://vcode.pinksync.io/*",
+    "https://api.pinksync.io/*",
+    "https://meet.google.com/*",
+    "https://zoom.us/*",
+    "https://teams.microsoft.com/*",
+    "https://*.webex.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://meet.google.com/*",
+        "https://zoom.us/*",
+        "https://teams.microsoft.com/*",
+        "https://*.webex.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "VCode Assistant",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["vcode-overlay.html", "assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

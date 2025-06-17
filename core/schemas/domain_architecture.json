@@ -1,0 +1,133 @@
+{
+  "domain_architecture": {
+    "primary_domain": "pinksync.io",
+    "purpose": "Content and community platform for deaf-first accessibility",
+    "subdomains": {
+      "app": {
+        "url": "app.pinksync.io",
+        "purpose": "Main application interface",
+        "features": ["neural_network_visualization", "asl_processing", "community_tools"]
+      },
+      "api": {
+        "url": "api.pinksync.io",
+        "purpose": "API gateway for all services",
+        "features": ["unified_api", "rate_limiting", "authentication"]
+      },
+      "auth": {
+        "url": "auth.pinksync.io",
+        "purpose": "DeafAuth authentication service",
+        "features": ["visual_verification", "asl_authentication", "accessibility_first"]
+      },
+      "trust": {
+        "url": "trust.pinksync.io",
+        "purpose": "FibonRose trust and verification",
+        "features": ["trust_scoring", "verification_badges", "community_validation"]
+      },
+      "vcode": {
+        "url": "vcode.pinksync.io",
+        "purpose": "Legal protection and evidence generation",
+        "features": ["court_admissible_evidence", "asl_interpretation", "legal_compliance"]
+      },
+      "docs": {
+        "url": "docs.pinksync.io",
+        "purpose": "Documentation with ASL support",
+        "features": ["asl_videos", "visual_guides", "accessibility_docs"]
+      }
+    }
+  },
+  "mbtquniverse_ecosystem": {
+    "primary_domain": "mbtquniverse.com",
+    "purpose": "Business ecosystem and project incubation",
+    "subdomains": {
+      "360magicians": {
+        "url": "360magicians.mbtquniverse.com",
+        "purpose": "Business lifecycle management platform",
+        "api_base": "https://api.mbtquniverse.com",
+        "features": ["idea_to_execution", "business_consulting", "deaf_entrepreneur_support"],
+        "lifecycle_phases": ["idea", "build", "grow", "manage"]
+      },
+      "startups": {
+        "url": "startups.mbtquniverse.com",
+        "purpose": "Startup incubation and development",
+        "features": ["startup_tools", "funding_connections", "mentor_network"]
+      },
+      "projects": {
+        "url": "projects.mbtquniverse.com",
+        "purpose": "Project management and collaboration",
+        "features": ["project_tracking", "team_collaboration", "milestone_management"]
+      },
+      "companies": {
+        "url": "companies.mbtquniverse.com",
+        "purpose": "Established company services",
+        "features": ["enterprise_tools", "scaling_solutions", "corporate_services"]
+      },
+      "dao": {
+        "url": "dao.mbtquniverse.com",
+        "purpose": "Decentralized Autonomous Organization platform",
+        "features": ["governance_voting", "proposal_system", "token_staking", "community_decisions"]
+      },
+      "voting": {
+        "url": "voting.mbtquniverse.com",
+        "purpose": "Democratic voting and governance",
+        "features": ["secure_voting", "proposal_management", "result_transparency"]
+      },
+      "metrics": {
+        "url": "metrics.mbtquniverse.com",
+        "purpose": "Analytics and performance tracking",
+        "features": ["business_analytics", "performance_dashboards", "roi_tracking"]
+      },
+      "staking": {
+        "url": "staking.mbtquniverse.com",
+        "purpose": "Token staking and rewards",
+        "features": ["stake_management", "reward_distribution", "governance_participation"]
+      },
+      "community": {
+        "url": "community.mbtquniverse.com",
+        "purpose": "Community engagement and feedback",
+        "features": ["community_forums", "feedback_systems", "user_engagement"]
+      }
+    }
+  },
+  "integration_architecture": {
+    "cross_domain_features": {
+      "single_sign_on": {
+        "provider": "auth.pinksync.io",
+        "supported_domains": ["*.pinksync.io", "*.mbtquniverse.com"]
+      },
+      "unified_api": {
+        "gateway": "api.pinksync.io",
+        "routes": {
+          "360magicians": "/api/360magicians/*",
+          "dao": "/api/dao/*",
+          "voting": "/api/voting/*",
+          "staking": "/api/staking/*"
+        }
+      },
+      "shared_services": {
+        "ai_processing": "Shared across all platforms",
+        "deaf_accessibility": "Core feature for all services",
+        "content_management": "Unified content system"
+      }
+    },
+    "data_flow": {
+      "user_data": "Centralized in auth.pinksync.io",
+      "business_data": "Distributed across mbtquniverse.com subdomains",
+      "community_data": "Shared between pinksync.io and community.mbtquniverse.com"
+    }
+  },
+  "deaf_first_compliance": {
+    "all_domains": {
+      "wcag_level": "AAA",
+      "asl_support": "native",
+      "visual_priority": "maximum",
+      "audio_dependency": "none",
+      "vibration_feedback": "full_support"
+    },
+    "specialized_features": {
+      "pinksync.io": "Neural network accessibility visualization",
+      "360magicians.mbtquniverse.com": "Business process ASL interpretation",
+      "dao.mbtquniverse.com": "Visual voting interfaces",
+      "community.mbtquniverse.com": "ASL community discussions"
+    }
+  }
+}

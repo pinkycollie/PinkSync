@@ -1,0 +1,279 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "360 Magicians API",
+    "version": "1.0.0",
+    "description": "API endpoints grouped by lifecycle: Idea, Build, Grow, Manage, Other"
+  },
+  "servers": [
+    {
+      "url": "https://api.mbtquniverse.com",
+      "description": "Production API"
+    },
+    {
+      "url": "http://localhost:9001",
+      "description": "Development API"
+    }
+  ],
+  "paths": {
+    "/api/idea/intake": {
+      "post": {
+        "summary": "Idea Intake",
+        "tags": ["Idea"],
+        "operationId": "ideaIntake",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdeaIntake"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Idea successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idea/readiness-check": {
+      "get": {
+        "summary": "Check Idea Readiness",
+        "tags": ["Idea"],
+        "operationId": "ideaReadinessCheck",
+        "responses": {
+          "200": {
+            "description": "Readiness assessment completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessCheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idea/path-selection": {
+      "post": {
+        "summary": "Select Development Path",
+        "tags": ["Idea"],
+        "operationId": "pathSelection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PathSelection"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/build/project-init": {
+      "post": {
+        "summary": "Initialize Project",
+        "tags": ["Build"],
+        "operationId": "projectInit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInit"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grow/subscription/create": {
+      "post": {
+        "summary": "Create Subscription",
+        "tags": ["Grow"],
+        "operationId": "createSubscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/manage/progress/track": {
+      "get": {
+        "summary": "Track Progress",
+        "tags": ["Manage"],
+        "operationId": "trackProgress",
+        "responses": {
+          "200": {
+            "description": "Progress tracking data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressTrack"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IdeaIntake": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Idea title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed idea description"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["tech", "business", "social", "creative"]
+          },
+          "deaf_accessibility": {
+            "type": "boolean",
+            "description": "Whether idea includes deaf accessibility features"
+          }
+        },
+        "required": ["title", "description", "category"]
+      },
+      "IdeaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["accepted", "needs_review", "rejected"]
+          },
+          "feedback": {
+            "type": "string"
+          },
+          "next_steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReadinessCheck": {
+        "type": "object",
+        "properties": {
+          "readiness_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "areas_to_improve": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deaf_accessibility_score": {
+            "type": "number",
+            "description": "Accessibility readiness score"
+          }
+        }
+      },
+      "PathSelection": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "enum": ["startup", "project", "company", "dao"]
+          },
+          "timeline": {
+            "type": "string",
+            "enum": ["3_months", "6_months", "1_year", "2_years"]
+          },
+          "budget": {
+            "type": "number"
+          }
+        }
+      },
+      "ProjectInit": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["web_app", "mobile_app", "api", "ai_service"]
+          },
+          "deaf_first": {
+            "type": "boolean",
+            "description": "Whether project is deaf-first design"
+          }
+        }
+      },
+      "SubscriptionCreate": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": ["basic", "pro", "enterprise"]
+          },
+          "billing_cycle": {
+            "type": "string",
+            "enum": ["monthly", "yearly"]
+          }
+        }
+      },
+      "ProgressTrack": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "completion_percentage": {
+            "type": "number"
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "completed": {
+                  "type": "boolean"
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

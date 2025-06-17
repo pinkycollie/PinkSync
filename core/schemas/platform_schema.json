@@ -1,0 +1,104 @@
+{
+  "platform": {
+    "name": "DEAF FIRST Platform",
+    "version": "1.0.0",
+    "accessibility_priority": "deaf_first",
+    "architecture": "monorepo_modular"
+  },
+  "applications": {
+    "360magicians": {
+      "name": "360 Magicians",
+      "type": "business_services",
+      "accessibility_features": ["asl_support", "visual_navigation", "vibration_feedback"],
+      "routes": {
+        "frontend": "/360magicians",
+        "api": "/api/360magicians",
+        "admin": "/admin/360magicians"
+      },
+      "deaf_optimizations": {
+        "visual_alerts": true,
+        "asl_interpretation": true,
+        "text_alternatives": true,
+        "high_contrast": true
+      }
+    },
+    "pinksync": {
+      "name": "PinkSync Neural Network",
+      "type": "ai_platform",
+      "accessibility_features": ["neural_visualization", "asl_processing", "visual_feedback"],
+      "routes": {
+        "frontend": "/pinksync",
+        "api": "/api/pinksync",
+        "neural": "/neural/pinksync"
+      },
+      "deaf_optimizations": {
+        "visual_neural_maps": true,
+        "asl_input_processing": true,
+        "vibration_patterns": true,
+        "color_coded_feedback": true
+      }
+    },
+    "mbtq_financial": {
+      "name": "MBTQ Financial Services",
+      "type": "financial_platform",
+      "accessibility_features": ["asl_video_chat", "visual_transactions", "deaf_support"],
+      "routes": {
+        "frontend": "/mbtq",
+        "api": "/api/mbtq",
+        "video_chat": "/video/mbtq"
+      },
+      "deaf_optimizations": {
+        "asl_video_banking": true,
+        "visual_transaction_alerts": true,
+        "deaf_customer_support": true,
+        "accessible_financial_tools": true
+      }
+    },
+    "personal_business": {
+      "name": "Personal Business Portal",
+      "type": "business_management",
+      "accessibility_features": ["visual_dashboard", "asl_resources", "deaf_networking"],
+      "routes": {
+        "frontend": "/business",
+        "api": "/api/business"
+      },
+      "deaf_optimizations": {
+        "visual_business_metrics": true,
+        "asl_business_resources": true,
+        "deaf_entrepreneur_network": true
+      }
+    }
+  },
+  "shared_services": {
+    "ai_service": {
+      "capabilities": ["gpt_workflows", "asl_processing", "recommendation_engine"],
+      "deaf_features": ["visual_ai_feedback", "asl_prompt_processing"]
+    },
+    "user_service": {
+      "capabilities": ["authentication", "profiles", "preferences"],
+      "deaf_features": ["visual_verification", "asl_profile_setup"]
+    },
+    "content_service": {
+      "capabilities": ["upload", "transcription", "analytics"],
+      "deaf_features": ["asl_transcription", "visual_content_tools"]
+    },
+    "vr_service": {
+      "capabilities": ["coach_tools", "scene_management"],
+      "deaf_features": ["asl_vr_environments", "haptic_feedback"]
+    }
+  },
+  "accessibility_standards": {
+    "wcag_compliance": "AAA",
+    "asl_support": "native",
+    "visual_priority": "maximum",
+    "audio_dependency": "none",
+    "vibration_support": "full",
+    "color_contrast": "high"
+  },
+  "routing_logic": {
+    "role_based": true,
+    "accessibility_aware": true,
+    "visual_navigation": true,
+    "asl_guided": true
+  }
+}

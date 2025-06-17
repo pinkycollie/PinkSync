@@ -1,0 +1,177 @@
+# Kubernetes Ingress configuration for PinkSync subdomains
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pinksync-ingress
+  namespace: pinksync
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "pinksync-global-ip"
+    networking.gke.io/managed-certificates: "pinksync-ssl-cert"
+    kubernetes.io/ingress.class: "gce"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+  # Main application - app.pinksync.io and pinksync.io
+  - host: app.pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pinksync-frontend-service
+            port:
+              number: 80
+  - host: pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pinksync-frontend-service
+            port:
+              number: 80
+  
+  # DeafAuth - auth.pinksync.io
+  - host: auth.pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: deafauth-service
+            port:
+              number: 80
+  
+  # FibonRose Trust - trust.pinksync.io
+  - host: trust.pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fibonrose-service
+            port:
+              number: 80
+  
+  # API Gateway - api.pinksync.io
+  - host: api.pinksync.io
+    http:
+      paths:
+      # Route DeafAuth API calls
+      - path: /api/deaf-auth
+        pathType: Prefix
+        backend:
+          service:
+            name: deafauth-service
+            port:
+              number: 80
+      # Route FibonRose API calls
+      - path: /api/fibonrose
+        pathType: Prefix
+        backend:
+          service:
+            name: fibonrose-service
+            port:
+              number: 80
+      # Route PinkSync API calls
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: pinksync-api-service
+            port:
+              number: 80
+  
+  # Documentation - docs.pinksync.io
+  - host: docs.pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pinksync-docs-service
+            port:
+              number: 80
+
+  # VCode Service - vcode.pinksync.io
+  - host: vcode.pinksync.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vcode-service
+            port:
+              number: 80
+
+---
+# ManagedCertificate for SSL
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: pinksync-ssl-cert
+  namespace: pinksync
+spec:
+  domains:
+    - pinksync.io
+    - auth.pinksync.io
+    - trust.pinksync.io
+    - app.pinksync.io
+    - api.pinksync.io
+    - docs.pinksync.io
+    - vcode.pinksync.io
+
+---
+# Documentation service deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinksync-docs-deployment
+  namespace: pinksync
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pinksync-docs
+  template:
+    metadata:
+      labels:
+        app: pinksync-docs
+    spec:
+      containers:
+      - name: docs
+        image: gcr.io/PROJECT_ID/pinksync-docs:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinksync-docs-service
+  namespace: pinksync
+spec:
+  selector:
+    app: pinksync-docs
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: ClusterIP

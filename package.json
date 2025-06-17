@@ -1,0 +1,98 @@
+{
+  "name": "deaf-first-monorepo",
+  "version": "1.0.0",
+  "description": "DEAF FIRST Platform - Comprehensive Monorepo for Deaf Accessibility",
+  "private": true,
+  "workspaces": [
+    "apps/*/frontend",
+    "apps/*/backend",
+    "apps/*/video-chat",
+    "apps/admin-portal/dashboard",
+    "services/*",
+    "core/shared/components"
+  ],
+  "scripts": {
+    "dev": "python run.py --all",
+    "start": "python run.py --all",
+    "build": "lerna run build",
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "accessibility-check": "lerna run accessibility-check",
+    "setup": "bash scripts/setup-monorepo-structure.sh",
+    "install-all": "lerna bootstrap",
+    "clean": "lerna clean",
+    "pinksync": "python run.py --service pinksync",
+    "360magicians": "python run.py --service 360magicians",
+    "mbtq": "python run.py --service mbtq-financial",
+    "business": "python run.py --service personal-business",
+    "admin": "python run.py --service admin-portal"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^0.0.66",
+    "@next/font": "^14.0.0",
+    "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-alert-dialog": "^1.0.5",
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-button": "^1.0.4",
+    "@radix-ui/react-card": "^1.0.4",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-progress": "latest",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "latest",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@supabase/supabase-js": "^2.39.0",
+    "@upstash/redis": "latest",
+    "ai": "^3.4.32",
+    "child_process": "latest",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "crypto": "latest",
+    "fs": "latest",
+    "lucide-react": "^0.454.0",
+    "next": "15.2.4",
+    "next-auth": "^4.24.5",
+    "next-themes": "latest",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^8.0.0",
+    "lerna": "^7.0.0",
+    "postcss": "^8.5",
+    "typescript": "^5"
+  },
+  "keywords": [
+    "deaf-first",
+    "accessibility",
+    "asl",
+    "monorepo",
+    "neural-network",
+    "financial-services",
+    "business-platform"
+  ],
+  "platform_info": {
+    "architecture": "deaf_first_monorepo",
+    "accessibility_level": "WCAG_AAA",
+    "asl_support": "native",
+    "visual_priority": "maximum",
+    "audio_dependency": "none"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/deaf-first-monorepo.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.9.0"
+  }
+}

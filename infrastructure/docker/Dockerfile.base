@@ -1,0 +1,53 @@
+# Base Dockerfile for DEAF FIRST Platform
+FROM python:3.11-slim
+
+# Set environment variables for deaf-first optimization
+ENV PYTHONUNBUFFERED=1
+ENV DEAF_FIRST_MODE=enabled
+ENV ACCESSIBILITY_LEVEL=AAA
+ENV ASL_SUPPORT=native
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libfontconfig1 \
+    libxrender1 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js for frontend builds
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Create app directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy core utilities
+COPY core/ ./core/
+
+# Set up accessibility tools
+RUN mkdir -p /app/accessibility-tools
+COPY tools/accessibility/ /app/accessibility-tools/
+
+# Create directories for ASL resources
+RUN mkdir -p /app/static/asl_videos
+RUN mkdir -p /app/static/accessibility_assets
+
+# Set permissions for deaf-first features
+RUN chmod +x /app/accessibility-tools/*
+
+# Expose common ports
+EXPOSE 3000 8000
+
+# Health check for accessibility compliance
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "from core.utils.deaf_accessibility import DeafAccessibilityChecker; checker = DeafAccessibilityChecker(); exit(0 if checker.verify_service_accessibility('base') else 1)"

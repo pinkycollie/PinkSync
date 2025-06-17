@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  # Shared Services
+  ai-service:
+    build: ./services/ai-service
+    ports:
+      - "8001:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEAF_ACCESSIBILITY=enabled
+    volumes:
+      - ./core:/app/core
+      - ./services/ai-service:/app
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - ASL_SUPPORT=enabled
+    volumes:
+      - ./core:/app/core
+      - ./services/user-service:/app
+
+  content-service:
+    build: ./services/content-service
+    ports:
+      - "8003:8000"
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - ASL_TRANSCRIPTION=enabled
+    volumes:
+      - ./core:/app/core
+      - ./services/content-service:/app
+
+  vr-service:
+    build: ./services/vr-service
+    ports:
+      - "8004:8000"
+    environment:
+      - VR_DEAF_FEATURES=enabled
+    volumes:
+      - ./core:/app/core
+      - ./services/vr-service:/app
+
+  # Application Services
+  pinksync-frontend:
+    build: ./apps/pinksync/frontend
+    ports:
+      - "3002:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8002
+      - NEXT_PUBLIC_DEAF_FIRST=true
+    volumes:
+      - ./apps/pinksync/frontend:/app
+      - ./core/shared:/app/shared
+
+  pinksync-backend:
+    build: ./apps/pinksync/backend
+    ports:
+      - "9002:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEURAL_NETWORK_ENABLED=true
+    volumes:
+      - ./apps/pinksync/backend:/app
+      - ./core:/app/core
+
+  magicians360-frontend:
+    build: ./apps/360magicians/frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_ASL_SUPPORT=enabled
+    volumes:
+      - ./apps/360magicians/frontend:/app
+      - ./core/shared:/app/shared
+
+  magicians360-backend:
+    build: ./apps/360magicians/backend
+    ports:
+      - "9001:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - BUSINESS_SERVICES=enabled
+    volumes:
+      - ./apps/360magicians/backend:/app
+      - ./core:/app/core
+
+  mbtq-frontend:
+    build: ./apps/mbtq-financial/frontend
+    ports:
+      - "3003:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8003
+      - NEXT_PUBLIC_VIDEO_CHAT=enabled
+    volumes:
+      - ./apps/mbtq-financial/frontend:/app
+      - ./core/shared:/app/shared
+
+  mbtq-backend:
+    build: ./apps/mbtq-financial/backend
+    ports:
+      - "9003:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - FINANCIAL_SERVICES=enabled
+    volumes:
+      - ./apps/mbtq-financial/backend:/app
+      - ./core:/app/core
+
+  mbtq-video-chat:
+    build: ./apps/mbtq-financial/video-chat
+    ports:
+      - "3013:3000"
+    environment:
+      - WEBRTC_ASL_SUPPORT=enabled
+      - DEAF_OPTIMIZED=true
+    volumes:
+      - ./apps/mbtq-financial/video-chat:/app
+
+  personal-business-frontend:
+    build: ./apps/personal-business/frontend
+    ports:
+      - "3004:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8004
+      - NEXT_PUBLIC_BUSINESS_TOOLS=enabled
+    volumes:
+      - ./apps/personal-business/frontend:/app
+      - ./core/shared:/app/shared
+
+  personal-business-backend:
+    build: ./apps/personal-business/backend
+    ports:
+      - "9004:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PERSONAL_BUSINESS=enabled
+    volumes:
+      - ./apps/personal-business/backend:/app
+      - ./core:/app/core
+
+  admin-portal:
+    build: ./apps/admin-portal/dashboard
+    ports:
+      - "3005:3000"
+    environment:
+      - NEXT_PUBLIC_ADMIN_MODE=true
+      - NEXT_PUBLIC_DEAF_ADMIN_TOOLS=enabled
+    volumes:
+      - ./apps/admin-portal/dashboard:/app
+      - ./core/shared:/app/shared
+
+  # Database and Cache
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: deaf_first_platform
+      POSTGRES_USER: deaf_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: deaf-first-network

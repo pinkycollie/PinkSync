@@ -1,0 +1,20 @@
+{
+  "name": "@deaf-first/vr-service",
+  "version": "1.0.0",
+  "description": "VR Service - ASL VR Environments and Haptic Feedback",
+  "main": "main.py",
+  "scripts": {
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8004",
+    "dev": "uvicorn main:app --reload --host 0.0.0.0 --port 8004",
+    "test": "pytest",
+    "vr-asl-test": "python scripts/test_vr_asl.py"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["vr", "asl-environments", "haptic-feedback", "coach-tools"],
+  "vr_features": {
+    "asl_vr_environments": true,
+    "haptic_feedback": true,
+    "deaf_optimized_vr": true
+  }
+}

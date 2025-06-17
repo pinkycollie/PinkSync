@@ -1,0 +1,74 @@
+# Redis configuration for production deployment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: pinksync
+data:
+  redis-url: "redis://default:Ab1pAAIjcDExNjIxMTZhN2NiYjY0M2I0YjJmYmY1Y2I4ZDgxMzBmOHAxMA@bright-shiner-48489.upstash.io:6379"
+  redis-host: "bright-shiner-48489.upstash.io"
+  redis-port: "6379"
+
+---
+# Redis connection secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: pinksync
+type: Opaque
+data:
+  # Base64 encoded values
+  redis-password: QWIxcEFBSWpjREV4TmpJeE1UWmhOMk5pWWpZME0ySjBZakptWW1ZMVkySTRaRGd4TXpCbU9IQXhNQT09
+  redis-token: eW91cl91cHN0YXNoX3Jlc3RfdG9rZW5faWZfdXNpbmdfcmVzdF9hcGk=
+  upstash-rest-token: eW91cl91cHN0YXNoX3Jlc3RfdG9rZW5faWZfdXNpbmdfcmVzdF9hcGk=
+
+---
+# Redis health check service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-health-check
+  namespace: pinksync
+spec:
+  selector:
+    app: redis-health-check
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-health-check
+  namespace: pinksync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-health-check
+  template:
+    metadata:
+      labels:
+        app: redis-health-check
+    spec:
+      containers:
+      - name: redis-health-check
+        image: redis:7-alpine
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            while true; do
+              redis-cli -h bright-shiner-48489.upstash.io -p 6379 -a Ab1pAAIjcDExNjIxMTZhN2NiYjY0M2I0YjJmYmY1Y2I4ZDgxMzBmOHAxMA ping
+              sleep 30
+            done
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"

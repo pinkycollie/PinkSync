@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: deaf-first-platform
+  labels:
+    accessibility: "deaf-first"
+    wcag-level: "AAA"
+    asl-support: "native"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deaf-first-config
+  namespace: deaf-first-platform
+data:
+  DEAF_FIRST_MODE: "enabled"
+  ACCESSIBILITY_LEVEL: "AAA"
+  ASL_SUPPORT: "native"
+  VISUAL_PRIORITY: "maximum"
+  AUDIO_DEPENDENCY: "none"
+  HIGH_CONTRAST: "enabled"
+  VIBRATION_FEEDBACK: "enabled"

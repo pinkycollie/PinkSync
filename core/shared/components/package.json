@@ -1,0 +1,32 @@
+{
+  "name": "@deaf-first/shared-components",
+  "version": "1.0.0",
+  "description": "Shared UI Components - Deaf-First Design System",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "accessibility-test": "npm run test -- --testPathPattern=accessibility"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "framer-motion": "^10.0.0",
+    "@deaf-first/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0",
+    "@storybook/react": "^7.0.0",
+    "jest-axe": "^8.0.0"
+  },
+  "keywords": ["design-system", "deaf-first", "accessibility", "asl-support"],
+  "design_features": {
+    "wcag_aaa_compliance": true,
+    "asl_video_support": true,
+    "high_contrast_themes": true,
+    "vibration_feedback": true
+  }
+}

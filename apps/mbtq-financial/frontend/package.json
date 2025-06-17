@@ -1,0 +1,36 @@
+{
+  "name": "@deaf-first/mbtq-financial-frontend",
+  "version": "1.0.0",
+  "description": "MBTQ Financial Services Frontend - Accessible Financial Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start -p 3003",
+    "lint": "next lint",
+    "video-chat": "node scripts/start-video-chat.js",
+    "financial-accessibility": "npm run test -- --testPathPattern=financial-accessibility"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@deaf-first/core": "workspace:*",
+    "@deaf-first/shared-components": "workspace:*",
+    "socket.io-client": "^4.0.0",
+    "simple-peer": "^9.0.0",
+    "chart.js": "^4.0.0",
+    "react-chartjs-2": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["financial-services", "asl-banking", "accessible-finance", "deaf-first"],
+  "financial_features": {
+    "asl_video_banking": true,
+    "visual_transactions": true,
+    "deaf_customer_support": true
+  }
+}

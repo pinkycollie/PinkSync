@@ -1,0 +1,20 @@
+{
+  "name": "@deaf-first/ai-service",
+  "version": "1.0.0",
+  "description": "AI Service - GPT Workflows with ASL Processing",
+  "main": "main.py",
+  "scripts": {
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8001",
+    "dev": "uvicorn main:app --reload --host 0.0.0.0 --port 8001",
+    "test": "pytest",
+    "asl-model-test": "python scripts/test_asl_models.py"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["ai", "gpt", "asl-processing", "recommendation-engine"],
+  "ai_features": {
+    "visual_ai_feedback": true,
+    "asl_prompt_processing": true,
+    "deaf_optimized_responses": true
+  }
+}

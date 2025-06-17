@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "npmClient": "npm",
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    }
+  },
+  "packages": ["apps/*/frontend", "apps/*/backend", "services/*", "core/shared/components"]
+}
