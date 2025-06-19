@@ -1,0 +1,21 @@
+# Google Cloud Scheduler configuration
+---
+name: projects/{{project_id}}/locations/{{region}}/jobs/sign-language-processor
+description: "Process sign language generation requests"
+schedule: "*/5 * * * *"  # Run every 5 minutes
+timeZone: "UTC"
+attemptDeadline: "180s"
+retryConfig:
+  retryCount: 3
+  maxRetryDuration: "120s"
+  minBackoffDuration: "10s"
+  maxBackoffDuration: "60s"
+  maxDoublings: 3
+httpTarget:
+  uri: "https://{{region}}-{{project_id}}.cloudfunctions.net/processSignLanguageRequests"
+  httpMethod: "POST"
+  headers:
+    Content-Type: "application/json"
+  body: "e30="  # Base64 encoded empty JSON object {}
+  oidcToken:
+    serviceAccountEmail: "{{service_account_email}}"

@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "NEXT_PUBLIC_SITE_URL": "@next_public_site_url",
+    "DATABASE_URL": "@database_url",
+    "REDIS_URL": "@redis_url",
+    "GROQ_API_KEY": "@groq_api_key",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "GOOGLE_CLIENT_ID": "1082881958822-qhit4gfhn27q2erfkl8kijdhmiishm71.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "@google_client_secret",
+    "NEXTAUTH_URL": "@next_public_site_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "${NEXT_PUBLIC_SITE_URL}"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-API-Key"
+        }
+      ]
+    }
+  ],
+  "github": {
+    "silent": true,
+    "autoAlias": true
+  }
+}
