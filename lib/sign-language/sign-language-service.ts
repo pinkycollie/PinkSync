@@ -12,21 +12,21 @@ const REDIS_NAMESPACES = {
 // Types for our service
 export interface SignLanguageRequest {
   text: string
-  targetDialect: "asl" | "bsl" | "auslan" | "lsf" | "lsm" | "jsl"
-  avatarStyle: "realistic" | "cartoon" | "minimal" | "human"
-  quality: "standard" | "high" | "premium"
+  signLanguage: "asl" | "bsl" | "isl" | "other"
+  targetLanguage: string
+  avatarStyle?: "realistic" | "cartoon" | "minimal"
+  quality?: "standard" | "high" | "premium"
   userId?: string
-  requestId?: string
 }
 
 export interface SignLanguageResponse {
   requestId: string
-  status: "pending" | "processing" | "completed" | "failed"
+  status: "queued" | "processing" | "completed" | "error"
   videoUrl?: string
   thumbnailUrl?: string
-  duration?: number
+  progress?: number
+  estimatedTime?: number
   error?: string
-  metadata?: Record<string, any>
 }
 
 interface TranslationResult {
@@ -42,176 +42,184 @@ interface TranslationResult {
  * Main service for generating sign language videos
  */
 export class SignLanguageService {
+  private supabase = createClient()
+
   /**
    * Submit a new sign language video generation request
    */
   async submitRequest(request: SignLanguageRequest): Promise<SignLanguageResponse> {
-    const supabase = createClient()
     try {
-      const requestId = request.requestId || `slg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
+      const requestId = `sl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
       // Check cache first
-      const cacheKey = `${REDIS_NAMESPACES.CACHE}:${this.generateCacheKey(request)}`
-      const cachedResult = await kv.get(cacheKey)
+      const cacheKey = this.getCacheKey(request.text, request.signLanguage)
+      const cached = await kv.get(cacheKey)
 
-      if (cachedResult) {
-        console.log(`Cache hit for request: ${requestId}`)
+      if (cached) {
+        const cachedData = cached as { videoUrl: string; thumbnailUrl: string }
         return {
           requestId,
           status: "completed",
-          ...(cachedResult as any),
+          videoUrl: cachedData.videoUrl,
+          thumbnailUrl: cachedData.thumbnailUrl,
+          progress: 100,
         }
       }
 
-      // Store the request in the videos table with sign language metadata
-      const { error: insertError } = await supabase.from("videos").insert({
-        id: requestId,
-        user_id: request.userId || null,
-        title: `Sign Language: ${request.text.substring(0, 50)}...`,
-        description: request.text,
-        status: "uploading", // Maps to your video_status enum
-        sign_language: request.targetDialect === "asl" ? "asl" : "other", // Map to your enum
-        metadata: {
-          original_text: request.text,
-          target_dialect: request.targetDialect,
-          avatar_style: request.avatarStyle,
-          quality: request.quality,
-          request_type: "sign_language_generation",
-        },
-      })
+      // Store request in database using videos table
+      const { data: videoRecord, error: dbError } = await this.supabase
+        .from("videos")
+        .insert({
+          id: requestId,
+          user_id: request.userId || null,
+          title: `Sign Language: ${request.text.substring(0, 50)}...`,
+          description: `Generated sign language video for: "${request.text}"`,
+          status: "uploading", // Maps to our processing status
+          sign_language: request.signLanguage === "other" ? null : request.signLanguage,
+          metadata: {
+            original_text: request.text,
+            target_language: request.targetLanguage,
+            avatar_style: request.avatarStyle || "realistic",
+            quality: request.quality || "standard",
+            request_type: "sign_language_generation",
+          },
+        })
+        .select()
+        .single()
 
-      if (insertError) {
-        console.error("Error inserting sign language request:", insertError)
-        throw new Error("Failed to store sign language request")
+      if (dbError) {
+        console.error("Error storing sign language request:", dbError)
+        throw new Error("Failed to store request")
       }
-
-      // Store status in Redis
-      await kv.hset(`${REDIS_NAMESPACES.STATUS}:${requestId}`, {
-        status: "pending",
-        progress: 0,
-        createdAt: Date.now(),
-      })
 
       // Add to processing queue
       await kv.lpush(
-        REDIS_NAMESPACES.QUEUE,
+        "pinksync:sign_language_queue",
         JSON.stringify({
           requestId,
-          priority: request.quality === "premium" ? 1 : 0,
           ...request,
+          timestamp: Date.now(),
         }),
       )
 
+      // Store initial status
+      await kv.hset(`pinksync:sign_language:status:${requestId}`, {
+        status: "queued",
+        progress: 0,
+        estimatedTime: this.estimateProcessingTime(request.text.length),
+        createdAt: Date.now(),
+      })
+
       return {
         requestId,
-        status: "pending",
+        status: "queued",
+        progress: 0,
+        estimatedTime: this.estimateProcessingTime(request.text.length),
       }
     } catch (error) {
       console.error("Error submitting sign language request:", error)
-      throw new Error("Failed to submit sign language generation request")
+      throw new Error("Failed to submit request")
     }
-  }
-
-  /**
-   * Get user preferences from user_accessibility_preferences table
-   */
-  async getUserPreferences(userId: string): Promise<any> {
-    const supabase = createClient()
-    try {
-      const { data: preferences, error } = await supabase
-        .from("user_accessibility_preferences")
-        .select("sign_language_preferences, visual_preferences")
-        .eq("user_id", userId)
-        .single()
-
-      if (error && error.code !== "PGRST116") {
-        console.error("Error getting user preferences:", error)
-      }
-
-      return (
-        preferences || {
-          sign_language_preferences: {
-            enabled: false,
-            dialect: "asl",
-            avatar_style: "realistic",
-          },
-          visual_preferences: {
-            high_contrast: false,
-            large_text: false,
-            color_scheme: "default",
-          },
-        }
-      )
-    } catch (error) {
-      console.error("Error getting user preferences:", error)
-      return {}
-    }
-  }
-
-  /**
-   * Generate cache key for request
-   */
-  private generateCacheKey(request: SignLanguageRequest): string {
-    const textHash = Buffer.from(request.text).toString("base64").slice(0, 16)
-    return `${textHash}:${request.targetDialect}:${request.avatarStyle}:${request.quality}`
   }
 
   /**
    * Get the status of a sign language generation request
    */
   async getRequestStatus(requestId: string): Promise<SignLanguageResponse> {
-    const supabase = createClient()
     try {
-      // Try Redis first for real-time status
-      const redisStatus = await kv.hgetall(`${REDIS_NAMESPACES.STATUS}:${requestId}`)
+      // Get status from Redis
+      const status = await kv.hgetall(`pinksync:sign_language:status:${requestId}`)
 
-      if (redisStatus && Object.keys(redisStatus).length > 0) {
+      if (!status) {
+        // Check database for completed requests
+        const { data: videoRecord, error } = await this.supabase.from("videos").select("*").eq("id", requestId).single()
+
+        if (error || !videoRecord) {
+          throw new Error("Request not found")
+        }
+
+        // Map video status to our status
+        const mappedStatus = this.mapVideoStatus(videoRecord.status)
+
         return {
           requestId,
-          status: redisStatus.status as any,
-          videoUrl: redisStatus.videoUrl,
-          thumbnailUrl: redisStatus.thumbnailUrl,
-          duration: redisStatus.duration ? Number.parseFloat(redisStatus.duration) : undefined,
-          error: redisStatus.error,
-          metadata: redisStatus.metadata ? JSON.parse(redisStatus.metadata) : undefined,
+          status: mappedStatus,
+          videoUrl: videoRecord.url || undefined,
+          thumbnailUrl: videoRecord.thumbnail_url || undefined,
+          progress: mappedStatus === "completed" ? 100 : 0,
         }
       }
 
-      // Fallback to videos table
-      const { data: video, error } = await supabase
-        .from("videos")
-        .select("id, status, url, thumbnail_url, duration, metadata")
-        .eq("id", requestId)
+      return {
+        requestId,
+        status: status.status as any,
+        videoUrl: status.videoUrl as string,
+        thumbnailUrl: status.thumbnailUrl as string,
+        progress: Number.parseInt(status.progress as string) || 0,
+        estimatedTime: Number.parseInt(status.estimatedTime as string) || undefined,
+        error: status.error as string,
+      }
+    } catch (error) {
+      console.error("Error getting request status:", error)
+      throw new Error("Failed to get request status")
+    }
+  }
+
+  /**
+   * Get user preferences from user_accessibility_preferences table
+   */
+  async getUserPreferences(userId: string) {
+    try {
+      const { data, error } = await this.supabase
+        .from("user_accessibility_preferences")
+        .select("sign_language_preferences")
+        .eq("user_id", userId)
         .single()
 
       if (error && error.code !== "PGRST116") {
-        console.error("Error getting video status:", error)
-        throw new Error("Failed to get sign language request status")
+        console.error("Error fetching user preferences:", error)
+        return null
       }
 
-      if (!video) {
-        throw new Error("Request not found")
-      }
-
-      // Map video status to sign language status
-      const statusMap: Record<string, any> = {
-        uploading: "pending",
-        processing: "processing",
-        ready: "completed",
-        error: "failed",
-      }
-
-      return {
-        requestId: video.id,
-        status: statusMap[video.status] || "pending",
-        videoUrl: video.url,
-        thumbnailUrl: video.thumbnail_url,
-        duration: video.duration,
-        metadata: video.metadata,
-      }
+      return (
+        data?.sign_language_preferences || {
+          enabled: false,
+          dialect: "asl",
+          avatar_style: "realistic",
+        }
+      )
     } catch (error) {
-      console.error("Error getting sign language request status:", error)
-      throw new Error("Failed to get sign language request status")
+      console.error("Unexpected error fetching user preferences:", error)
+      return null
+    }
+  }
+
+  /**
+   * Generate cache key for request
+   */
+  private getCacheKey(text: string, signLanguage: string): string {
+    const textHash = Buffer.from(text).toString("base64").substring(0, 20)
+    return `pinksync:sign_language:cache:${textHash}:${signLanguage}`
+  }
+
+  private estimateProcessingTime(textLength: number): number {
+    // Estimate 2-5 seconds per word
+    const wordCount = textLength / 5 // Rough estimate
+    return Math.max(30, wordCount * 3) // Minimum 30 seconds
+  }
+
+  private mapVideoStatus(videoStatus: string): "queued" | "processing" | "completed" | "error" {
+    switch (videoStatus) {
+      case "uploading":
+        return "queued"
+      case "processing":
+        return "processing"
+      case "ready":
+        return "completed"
+      case "error":
+        return "error"
+      default:
+        return "queued"
     }
   }
 

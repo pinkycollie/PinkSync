@@ -12,19 +12,30 @@ export async function logAuthEvent({ event, userId, ipAddress, userAgent, detail
   const supabase = createClient()
 
   try {
-    // Use the notifications table for audit logging with a specific type
+    // Ensure all data is properly serializable
+    const auditData = {
+      event_type: event,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      details: details || {},
+      timestamp: new Date().toISOString(),
+    }
+
+    // Validate that the data can be serialized to JSON
+    try {
+      JSON.stringify(auditData)
+    } catch (jsonError) {
+      console.error("Data is not JSON serializable:", jsonError)
+      // Create a safe version of the data
+      auditData.details = { error: "Data not serializable" }
+    }
+
     const { error } = await supabase.from("notifications").insert({
-      user_id: userId,
+      user_id: userId || null,
       type: "audit_log",
       title: `Auth Event: ${event}`,
       message: `Authentication event occurred: ${event}`,
-      data: {
-        event_type: event,
-        ip_address: ipAddress,
-        user_agent: userAgent,
-        details: details,
-        timestamp: new Date().toISOString(),
-      },
+      data: auditData,
       read: true, // Mark audit logs as read by default
     })
 

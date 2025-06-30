@@ -1,92 +1,148 @@
-import { SignLanguageService } from "@/lib/sign-language/sign-language-service"
-import { mcpClient } from "@/lib/mcp/service-client"
+import { kv } from "@vercel/kv"
+import { createClient } from "@/lib/supabase/server"
 
-/**
- * Background worker for processing sign language generation requests
- * This can be deployed as a separate service or Cloud Function
- */
+interface QueueItem {
+  requestId: string
+  text: string
+  signLanguage: string
+  targetLanguage: string
+  avatarStyle: string
+  quality: string
+  userId?: string
+  timestamp: number
+}
+
 export class SignLanguageWorker {
-  private service: SignLanguageService
-  private isRunning = false
-  private processingInterval: NodeJS.Timeout | null = null
+  private supabase = createClient()
+  private isProcessing = false
 
-  constructor() {
-    this.service = new SignLanguageService()
-  }
-
-  /**
-   * Start the worker
-   */
-  start(intervalMs = 5000) {
-    if (this.isRunning) {
-      console.log("Worker is already running")
+  async processQueue() {
+    if (this.isProcessing) {
+      console.log("Worker already processing, skipping...")
       return
     }
 
-    this.isRunning = true
-    console.log("Starting sign language worker...")
+    this.isProcessing = true
 
-    this.processingInterval = setInterval(async () => {
-      try {
-        await this.processQueue()
-      } catch (error) {
-        console.error("Error in worker processing:", error)
+    try {
+      while (true) {
+        // Get next item from queue
+        const queueItem = await kv.rpop("pinksync:sign_language_queue")
+
+        if (!queueItem) {
+          console.log("No items in queue, stopping worker")
+          break
+        }
+
+        let item: QueueItem
+        try {
+          item = JSON.parse(queueItem as string)
+        } catch (parseError) {
+          console.error("Error parsing queue item:", parseError)
+          continue
+        }
+
+        console.log(`Processing sign language request: ${item.requestId}`)
+
+        try {
+          await this.processSignLanguageRequest(item)
+        } catch (error) {
+          console.error(`Error processing request ${item.requestId}:`, error)
+          await this.markRequestAsError(item.requestId, error.message)
+        }
       }
-    }, intervalMs)
+    } finally {
+      this.isProcessing = false
+    }
   }
 
-  /**
-   * Stop the worker
-   */
-  stop() {
-    if (!this.isRunning) {
-      return
-    }
+  private async processSignLanguageRequest(item: QueueItem) {
+    const { requestId, text, signLanguage, avatarStyle, quality } = item
 
-    this.isRunning = false
+    // Update status to processing
+    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
+      status: "processing",
+      progress: 10,
+    })
 
-    if (this.processingInterval) {
-      clearInterval(this.processingInterval)
-      this.processingInterval = null
-    }
+    // Update database status
+    await this.supabase.from("videos").update({ status: "processing" }).eq("id", requestId)
 
-    console.log("Sign language worker stopped")
+    // Simulate AI processing steps
+    await this.updateProgress(requestId, 25, "Analyzing text...")
+    await this.sleep(2000)
+
+    await this.updateProgress(requestId, 50, "Generating sign language sequence...")
+    await this.sleep(3000)
+
+    await this.updateProgress(requestId, 75, "Rendering avatar...")
+    await this.sleep(4000)
+
+    await this.updateProgress(requestId, 90, "Finalizing video...")
+    await this.sleep(2000)
+
+    // Generate mock video URLs (in production, these would be real URLs)
+    const videoUrl = `https://storage.googleapis.com/pinksync-videos/${requestId}.mp4`
+    const thumbnailUrl = `https://storage.googleapis.com/pinksync-videos/${requestId}_thumb.jpg`
+
+    // Update final status
+    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
+      status: "completed",
+      progress: 100,
+      videoUrl,
+      thumbnailUrl,
+    })
+
+    // Update database with final URLs
+    await this.supabase
+      .from("videos")
+      .update({
+        status: "ready",
+        url: videoUrl,
+        thumbnail_url: thumbnailUrl,
+        duration: Math.floor(text.length / 10), // Rough estimate
+      })
+      .eq("id", requestId)
+
+    // Cache the result for future requests
+    const cacheKey = this.getCacheKey(text, signLanguage)
+    await kv.setex(
+      cacheKey,
+      60 * 60 * 24 * 7,
+      JSON.stringify({
+        // 7 days
+        videoUrl,
+        thumbnailUrl,
+      }),
+    )
+
+    console.log(`Completed processing request: ${requestId}`)
   }
 
-  /**
-   * Process the queue
-   */
-  private async processQueue() {
-    const maxConcurrent = 3 // Process up to 3 requests concurrently
-    const promises: Promise<boolean>[] = []
+  private async updateProgress(requestId: string, progress: number, message?: string) {
+    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
+      progress,
+      message: message || "",
+    })
+  }
 
-    for (let i = 0; i < maxConcurrent; i++) {
-      promises.push(this.service.processNextRequest())
-    }
+  private async markRequestAsError(requestId: string, errorMessage: string) {
+    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
+      status: "error",
+      error: errorMessage,
+    })
 
-    const results = await Promise.allSettled(promises)
-    const processed = results.filter((result) => result.status === "fulfilled" && result.value === true).length
+    await this.supabase.from("videos").update({ status: "error" }).eq("id", requestId)
+  }
 
-    if (processed > 0) {
-      console.log(`Processed ${processed} sign language requests`)
+  private getCacheKey(text: string, signLanguage: string): string {
+    const textHash = Buffer.from(text).toString("base64").substring(0, 20)
+    return `pinksync:sign_language:cache:${textHash}:${signLanguage}`
+  }
 
-      // Track worker metrics
-      try {
-        await mcpClient.trackEvent("sign_language_worker_processed", {
-          processedCount: processed,
-          timestamp: Date.now(),
-        })
-      } catch (error) {
-        console.warn("Could not track worker metrics:", error)
-      }
-    }
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }
 
-// Export singleton instance
 export const signLanguageWorker = new SignLanguageWorker()
-
-// Auto-start in production
-if (process.env.NODE_ENV === "production" && process.env.WORKER_ENABLED === "true") {
-  signLanguageWorker.start()
-}
