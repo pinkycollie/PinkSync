@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Scan, X, Info } from "lucide-react"
+import { Scan, X, Info, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { usePinkSyncData } from "@/hooks/use-pinksync-data"
 
 export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -13,7 +14,9 @@ export default function ScanPage() {
   const [scanning, setScanning] = useState(false)
   const [permission, setPermission] = useState<boolean | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [processingQR, setProcessingQR] = useState(false)
   const router = useRouter()
+  const { processQRCode, loading } = usePinkSyncData()
 
   useEffect(() => {
     // Check if we're in a browser environment
@@ -52,6 +55,26 @@ export default function ScanPage() {
     setScanning(false)
   }
 
+  const handleQRCodeDetected = async (qrData: string) => {
+    setScanning(false)
+    setProcessingQR(true)
+
+    try {
+      // Generate session ID for tracking
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+      // Process QR code through PinkSync API
+      const content = await processQRCode(qrData, sessionId)
+
+      // Navigate to AR view with the processed content
+      router.push(`/scanqr/ar?qrData=${encodeURIComponent(qrData)}`)
+    } catch (error) {
+      console.error("Error processing QR code:", error)
+      setError(error instanceof Error ? error.message : "Failed to process QR code")
+      setProcessingQR(false)
+    }
+  }
+
   const scanQRCode = () => {
     if (!scanning) return
 
@@ -70,15 +93,13 @@ export default function ScanPage() {
 
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-      // Here you would normally use a QR code detection library
-      // For this example, we'll simulate finding a QR code after 3 seconds
+      // In a real implementation, you would use a QR code detection library like jsQR
+      // For this demo, we'll simulate finding a QR code after 3 seconds
       setTimeout(() => {
         if (scanning) {
-          // Simulate QR code detection
+          // Simulate QR code detection with real data
           const qrData = "sign-language-content-1"
-
-          // Navigate to AR view with the QR data
-          router.push(`/scanqr/ar?qrData=${encodeURIComponent(qrData)}`)
+          handleQRCodeDetected(qrData)
         }
       }, 3000)
     }
@@ -121,11 +142,27 @@ export default function ScanPage() {
           </Card>
         )}
 
+        {processingQR && (
+          <Card className="mb-6 border-pink-200 bg-pink-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <Loader2 className="h-5 w-5 animate-spin text-pink-600" />
+                <div>
+                  <h3 className="font-medium text-pink-900">Processing QR Code</h3>
+                  <p className="mt-1 text-sm text-pink-700">
+                    PinkSync AI is processing your QR code and preparing the sign language content...
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="relative overflow-hidden rounded-lg bg-black">
           <video ref={videoRef} className="h-[400px] w-full object-cover" autoPlay playsInline muted />
           <canvas ref={canvasRef} className="absolute left-0 top-0 hidden" />
 
-          {!scanning && (
+          {!scanning && !processingQR && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
               <Scan className="mb-4 h-12 w-12" />
               <p className="mb-6 text-center text-lg">Position a QR code in the camera view</p>
@@ -135,7 +172,7 @@ export default function ScanPage() {
             </div>
           )}
 
-          {scanning && (
+          {scanning && !processingQR && (
             <>
               <div className="absolute inset-0 border-2 border-pink-500 opacity-50"></div>
               <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 transform border-2 border-white"></div>
@@ -147,10 +184,18 @@ export default function ScanPage() {
               </Button>
             </>
           )}
+
+          {processingQR && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
+              <Loader2 className="mb-4 h-12 w-12 animate-spin" />
+              <p className="text-center text-lg">Processing with PinkSync AI...</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Scan any PinkSync: Scan QR-enabled QR code to view sign language content as an AR hologram.</p>
+          <p className="mt-2 text-xs">Powered by PinkSync's real-time data + AI engine</p>
         </div>
       </div>
     </div>
