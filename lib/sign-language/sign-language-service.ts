@@ -14,7 +14,7 @@ export interface SignLanguageRequest {
   text: string
   signLanguage: "asl" | "bsl" | "isl" | "other"
   targetLanguage: string
-  avatarStyle?: "realistic" | "cartoon" | "minimal"
+  avatarStyle?: "realistic" | "cartoon" | "minimal" | "human"
   quality?: "standard" | "high" | "premium"
   userId?: string
 }
@@ -43,6 +43,9 @@ interface TranslationResult {
  */
 export class SignLanguageService {
   private supabase = createClient()
+  private readonly QUEUE_KEY = "pinksync:sign_language_queue"
+  private readonly STATUS_KEY_PREFIX = "pinksync:sign_language:status"
+  private readonly CACHE_KEY_PREFIX = "pinksync:sign_language:cache"
 
   /**
    * Submit a new sign language video generation request
@@ -82,6 +85,7 @@ export class SignLanguageService {
             avatar_style: request.avatarStyle || "realistic",
             quality: request.quality || "standard",
             request_type: "sign_language_generation",
+            request_timestamp: new Date().toISOString(),
           },
         })
         .select()
@@ -94,7 +98,7 @@ export class SignLanguageService {
 
       // Add to processing queue
       await kv.lpush(
-        "pinksync:sign_language_queue",
+        this.QUEUE_KEY,
         JSON.stringify({
           requestId,
           ...request,
@@ -103,12 +107,16 @@ export class SignLanguageService {
       )
 
       // Store initial status
-      await kv.hset(`pinksync:sign_language:status:${requestId}`, {
-        status: "queued",
-        progress: 0,
-        estimatedTime: this.estimateProcessingTime(request.text.length),
-        createdAt: Date.now(),
-      })
+      await kv.set(
+        `${this.STATUS_KEY_PREFIX}:${requestId}`,
+        JSON.stringify({
+          status: "queued",
+          progress: 0,
+          estimatedTime: this.estimateProcessingTime(request.text.length),
+          createdAt: Date.now(),
+        }),
+        { ex: 3600 }, // Expire after 1 hour
+      )
 
       return {
         requestId,
@@ -128,40 +136,119 @@ export class SignLanguageService {
   async getRequestStatus(requestId: string): Promise<SignLanguageResponse> {
     try {
       // Get status from Redis
-      const status = await kv.hgetall(`pinksync:sign_language:status:${requestId}`)
+      const statusData = await kv.get(`${this.STATUS_KEY_PREFIX}:${requestId}`)
 
-      if (!status) {
+      if (!statusData) {
         // Check database for completed requests
-        const { data: videoRecord, error } = await this.supabase.from("videos").select("*").eq("id", requestId).single()
+        const { data: video, error } = await this.supabase.from("videos").select("*").eq("id", requestId).single()
 
-        if (error || !videoRecord) {
-          throw new Error("Request not found")
+        if (error || !video) {
+          return {
+            requestId,
+            status: "error",
+            error: "Request not found",
+          }
         }
 
         // Map video status to our status
-        const mappedStatus = this.mapVideoStatus(videoRecord.status)
+        const status = this.mapVideoStatus(video.status)
 
         return {
           requestId,
-          status: mappedStatus,
-          videoUrl: videoRecord.url || undefined,
-          thumbnailUrl: videoRecord.thumbnail_url || undefined,
-          progress: mappedStatus === "completed" ? 100 : 0,
+          status,
+          videoUrl: video.url,
+          thumbnailUrl: video.thumbnail_url,
+          progress: status === "completed" ? 100 : 0,
         }
       }
 
+      const status = JSON.parse(statusData as string)
       return {
         requestId,
-        status: status.status as any,
-        videoUrl: status.videoUrl as string,
-        thumbnailUrl: status.thumbnailUrl as string,
-        progress: Number.parseInt(status.progress as string) || 0,
-        estimatedTime: Number.parseInt(status.estimatedTime as string) || undefined,
-        error: status.error as string,
+        status: status.status,
+        videoUrl: status.videoUrl,
+        thumbnailUrl: status.thumbnailUrl,
+        progress: status.progress,
+        estimatedTime: status.estimatedTime,
+        error: status.error,
       }
     } catch (error) {
       console.error("Error getting request status:", error)
-      throw new Error("Failed to get request status")
+      return {
+        requestId,
+        status: "error",
+        error: "Failed to get status",
+      }
+    }
+  }
+
+  /**
+   * Update the status of a sign language generation request
+   */
+  async updateRequestStatus(
+    requestId: string,
+    status: "processing" | "completed" | "error",
+    progress: number,
+    videoUrl?: string,
+    thumbnailUrl?: string,
+    error?: string,
+  ): Promise<void> {
+    try {
+      // Update Redis status
+      await kv.set(
+        `${this.STATUS_KEY_PREFIX}:${requestId}`,
+        JSON.stringify({
+          status,
+          progress,
+          videoUrl,
+          thumbnailUrl,
+          error,
+          updatedAt: Date.now(),
+        }),
+        { ex: 3600 },
+      )
+
+      // Update database
+      const updateData: any = {
+        status: this.mapStatusToVideoStatus(status),
+        updated_at: new Date().toISOString(),
+      }
+
+      if (videoUrl) {
+        updateData.url = videoUrl
+      }
+      if (thumbnailUrl) {
+        updateData.thumbnail_url = thumbnailUrl
+      }
+      if (status === "error" && error) {
+        updateData.metadata = {
+          error_message: error,
+          error_timestamp: new Date().toISOString(),
+        }
+      }
+
+      const { error: dbError } = await this.supabase.from("videos").update(updateData).eq("id", requestId)
+
+      if (dbError) {
+        console.error("Error updating video status in database:", dbError)
+      }
+
+      // Cache completed requests
+      if (status === "completed" && videoUrl) {
+        const { data: video } = await this.supabase.from("videos").select("metadata").eq("id", requestId).single()
+
+        if (video.data?.metadata?.original_text && video.data?.metadata?.sign_language) {
+          const cacheKey = this.getCacheKey(video.data.metadata.original_text, video.data.metadata.sign_language)
+
+          await kv.set(
+            cacheKey,
+            JSON.stringify({ videoUrl, thumbnailUrl }),
+            { ex: 604800 }, // Cache for 7 days
+          )
+        }
+      }
+    } catch (error) {
+      console.error("Error updating request status:", error)
     }
   }
 
@@ -198,8 +285,8 @@ export class SignLanguageService {
    * Generate cache key for request
    */
   private getCacheKey(text: string, signLanguage: string): string {
-    const textHash = Buffer.from(text).toString("base64").substring(0, 20)
-    return `pinksync:sign_language:cache:${textHash}:${signLanguage}`
+    const textHash = Buffer.from(text).toString("base64").substring(0, 32)
+    return `${this.CACHE_KEY_PREFIX}:${textHash}:${signLanguage}`
   }
 
   private estimateProcessingTime(textLength: number): number {
@@ -220,6 +307,21 @@ export class SignLanguageService {
         return "error"
       default:
         return "queued"
+    }
+  }
+
+  private mapStatusToVideoStatus(status: string): string {
+    switch (status) {
+      case "queued":
+        return "uploading"
+      case "processing":
+        return "processing"
+      case "completed":
+        return "ready"
+      case "error":
+        return "error"
+      default:
+        return "uploading"
     }
   }
 

@@ -1,24 +1,22 @@
 import { kv } from "@vercel/kv"
-import { createClient } from "@/lib/supabase/server"
+import { signLanguageService } from "../sign-language/sign-language-service"
 
-interface QueueItem {
+export interface WorkerJob {
   requestId: string
   text: string
-  signLanguage: string
-  targetLanguage: string
-  avatarStyle: string
-  quality: string
+  signLanguage: "asl" | "bsl" | "isl" | "other"
+  avatarStyle: "realistic" | "cartoon" | "minimal" | "human"
+  quality: "standard" | "high" | "premium"
   userId?: string
   timestamp: number
 }
 
 export class SignLanguageWorker {
-  private supabase = createClient()
+  private readonly QUEUE_KEY = "pinksync:sign_language_queue"
   private isProcessing = false
 
-  async processQueue() {
+  async processQueue(): Promise<void> {
     if (this.isProcessing) {
-      console.log("Worker already processing, skipping...")
       return
     }
 
@@ -26,122 +24,82 @@ export class SignLanguageWorker {
 
     try {
       while (true) {
-        // Get next item from queue
-        const queueItem = await kv.rpop("pinksync:sign_language_queue")
+        // Get next job from queue
+        const jobData = await kv.rpop(this.QUEUE_KEY)
 
-        if (!queueItem) {
-          console.log("No items in queue, stopping worker")
-          break
+        if (!jobData) {
+          break // No more jobs
         }
 
-        let item: QueueItem
-        try {
-          item = JSON.parse(queueItem as string)
-        } catch (parseError) {
-          console.error("Error parsing queue item:", parseError)
-          continue
-        }
-
-        console.log(`Processing sign language request: ${item.requestId}`)
-
-        try {
-          await this.processSignLanguageRequest(item)
-        } catch (error) {
-          console.error(`Error processing request ${item.requestId}:`, error)
-          await this.markRequestAsError(item.requestId, error.message)
-        }
+        const job: WorkerJob = JSON.parse(jobData as string)
+        await this.processJob(job)
       }
+    } catch (error) {
+      console.error("Error processing queue:", error)
     } finally {
       this.isProcessing = false
     }
   }
 
-  private async processSignLanguageRequest(item: QueueItem) {
-    const { requestId, text, signLanguage, avatarStyle, quality } = item
+  private async processJob(job: WorkerJob): Promise<void> {
+    try {
+      console.log(`Processing sign language job: ${job.requestId}`)
 
-    // Update status to processing
-    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
-      status: "processing",
-      progress: 10,
-    })
+      // Update status to processing
+      await signLanguageService.updateRequestStatus(job.requestId, "processing", 10)
 
-    // Update database status
-    await this.supabase.from("videos").update({ status: "processing" }).eq("id", requestId)
+      // Simulate AI processing steps
+      await this.simulateProcessing(job)
 
-    // Simulate AI processing steps
-    await this.updateProgress(requestId, 25, "Analyzing text...")
-    await this.sleep(2000)
+      // Generate mock video URL (in production, this would be real AI generation)
+      const videoUrl = await this.generateSignLanguageVideo(job)
+      const thumbnailUrl = await this.generateThumbnail(job)
 
-    await this.updateProgress(requestId, 50, "Generating sign language sequence...")
-    await this.sleep(3000)
+      // Update status to completed
+      await signLanguageService.updateRequestStatus(job.requestId, "completed", 100, videoUrl, thumbnailUrl)
 
-    await this.updateProgress(requestId, 75, "Rendering avatar...")
-    await this.sleep(4000)
+      console.log(`Completed sign language job: ${job.requestId}`)
+    } catch (error) {
+      console.error(`Error processing job ${job.requestId}:`, error)
 
-    await this.updateProgress(requestId, 90, "Finalizing video...")
-    await this.sleep(2000)
-
-    // Generate mock video URLs (in production, these would be real URLs)
-    const videoUrl = `https://storage.googleapis.com/pinksync-videos/${requestId}.mp4`
-    const thumbnailUrl = `https://storage.googleapis.com/pinksync-videos/${requestId}_thumb.jpg`
-
-    // Update final status
-    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
-      status: "completed",
-      progress: 100,
-      videoUrl,
-      thumbnailUrl,
-    })
-
-    // Update database with final URLs
-    await this.supabase
-      .from("videos")
-      .update({
-        status: "ready",
-        url: videoUrl,
-        thumbnail_url: thumbnailUrl,
-        duration: Math.floor(text.length / 10), // Rough estimate
-      })
-      .eq("id", requestId)
-
-    // Cache the result for future requests
-    const cacheKey = this.getCacheKey(text, signLanguage)
-    await kv.setex(
-      cacheKey,
-      60 * 60 * 24 * 7,
-      JSON.stringify({
-        // 7 days
-        videoUrl,
-        thumbnailUrl,
-      }),
-    )
-
-    console.log(`Completed processing request: ${requestId}`)
+      await signLanguageService.updateRequestStatus(
+        job.requestId,
+        "error",
+        0,
+        undefined,
+        undefined,
+        error instanceof Error ? error.message : "Processing failed",
+      )
+    }
   }
 
-  private async updateProgress(requestId: string, progress: number, message?: string) {
-    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
-      progress,
-      message: message || "",
-    })
+  private async simulateProcessing(job: WorkerJob): Promise<void> {
+    const steps = [
+      { progress: 20, message: "Analyzing text structure..." },
+      { progress: 40, message: "Translating to sign language..." },
+      { progress: 60, message: "Generating avatar movements..." },
+      { progress: 80, message: "Rendering video..." },
+      { progress: 95, message: "Finalizing output..." },
+    ]
+
+    for (const step of steps) {
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // 2 second delay
+
+      await signLanguageService.updateRequestStatus(job.requestId, "processing", step.progress)
+    }
   }
 
-  private async markRequestAsError(requestId: string, errorMessage: string) {
-    await kv.hset(`pinksync:sign_language:status:${requestId}`, {
-      status: "error",
-      error: errorMessage,
-    })
-
-    await this.supabase.from("videos").update({ status: "error" }).eq("id", requestId)
+  private async generateSignLanguageVideo(job: WorkerJob): Promise<string> {
+    // In production, this would call actual AI services
+    // For now, return a placeholder video URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pinksync.io"
+    return `${baseUrl}/api/videos/sign-language/${job.requestId}.mp4`
   }
 
-  private getCacheKey(text: string, signLanguage: string): string {
-    const textHash = Buffer.from(text).toString("base64").substring(0, 20)
-    return `pinksync:sign_language:cache:${textHash}:${signLanguage}`
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+  private async generateThumbnail(job: WorkerJob): Promise<string> {
+    // In production, this would generate an actual thumbnail
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pinksync.io"
+    return `${baseUrl}/api/videos/sign-language/${job.requestId}-thumb.jpg`
   }
 }
 
