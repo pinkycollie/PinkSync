@@ -1,0 +1,92 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { SignLanguageVideo } from "@/components/sign-language-video"
+import { motion } from "framer-motion"
+
+export function Hero() {
+  const [showVideo, setShowVideo] = useState(false)
+
+  return (
+    <section className="relative bg-gradient-to-b from-primary-800 to-secondary-800 text-white py-24 overflow-hidden">
+      {/* Accessibility toggle button */}
+      <div className="absolute top-4 right-4 z-10">
+        <Button
+          variant="outline"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          onClick={() => setShowVideo(!showVideo)}
+        >
+          {showVideo ? "Hide Sign Language" : "Show Sign Language"}
+        </Button>
+      </div>
+
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col lg:flex-row items-center gap-12">
+          <motion.div
+            className="lg:w-1/2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              One Layer.
+              <br />
+              One Accessibility.
+            </h1>
+            <p className="text-xl mb-8 text-primary-100">
+              PinkSync transforms how enterprises deliver accessibility to deaf users. One integration. Every digital
+              touchpoint. Instant compliance.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" className="bg-primary-500 hover:bg-primary-600">
+                Schedule Enterprise Demo
+              </Button>
+              <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
+                View Integration Guide
+              </Button>
+            </div>
+
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex -space-x-2">
+                {["Amazon", "Microsoft", "Google", "IBM", "Oracle"].map((company, i) => (
+                  <div
+                    key={company}
+                    className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-primary-800 font-bold text-xs border-2 border-primary-800"
+                    title={`${company} uses PinkSync`}
+                  >
+                    {company.charAt(0)}
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-primary-100">Trusted by Fortune 500 companies</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="lg:w-1/2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {showVideo ? (
+              <div className="relative rounded-lg overflow-hidden shadow-2xl">
+                <SignLanguageVideo src="/videos/hero-message.mp4" poster="/images/hero-video-poster.jpg" />
+              </div>
+            ) : (
+              <div className="relative rounded-lg overflow-hidden shadow-2xl">
+                <img src="/placeholder-o3zva.png" alt="PinkSync Enterprise Dashboard" className="w-full" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                  <div className="p-6">
+                    <p className="text-white font-medium">PinkSync Enterprise Dashboard</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
