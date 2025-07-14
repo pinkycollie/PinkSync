@@ -1,0 +1,117 @@
+/* PinkSync Base Variables */
+:root {
+  --ps-accent: 330 100% 71%;
+  --ps-accent-light: 330 100% 90%;
+  --ps-accent-dark: 330 100% 50%;
+  --ps-video-border: rgba(255, 105, 180, 0.5);
+  --ps-video-shadow: rgba(255, 105, 180, 0.2);
+}
+
+.dark {
+  --ps-accent: 330 70% 60%;
+  --ps-accent-light: 330 70% 30%;
+  --ps-accent-dark: 330 70% 80%;
+  --ps-video-border: rgba(255, 105, 180, 0.5);
+  --ps-video-shadow: rgba(255, 105, 180, 0.3);
+}
+
+/* PinkSync Ambient Mode Styles */
+.pink-sync-ambient .pink-sync-ambient-container {
+  transition: all 0.3s ease;
+}
+
+.pink-sync-ambient .pink-sync-video-container {
+  box-shadow: 0 0 10px var(--ps-video-shadow);
+  transition: all 0.3s ease;
+}
+
+.pink-sync-ambient .pink-sync-text {
+  transition: opacity 0.3s ease;
+}
+
+/* PinkSync Interactive Mode Styles */
+.pink-sync-interactive .pink-sync-text {
+  border-bottom: 1px dotted hsl(var(--ps-accent));
+  transition: all 0.2s ease;
+}
+
+.pink-sync-interactive .pink-sync-text:hover {
+  background-color: hsl(var(--ps-accent-light) / 0.2);
+  color: hsl(var(--ps-accent-dark));
+}
+
+.pink-sync-interactive .pink-sync-video-popup {
+  box-shadow: 0 0 15px var(--ps-video-shadow);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PinkSync Immersive Mode Styles */
+.pink-sync-immersive .pink-sync-immersive-container {
+  margin: 0.25rem;
+  transition: transform 0.3s ease;
+}
+
+.pink-sync-immersive .pink-sync-immersive-container:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+/* Video size variations */
+[data-ps-size="small"] .pink-sync-video-container,
+[data-ps-size="small"] .pink-sync-immersive-container {
+  width: 120px;
+  height: 90px;
+}
+
+[data-ps-size="medium"] .pink-sync-video-container,
+[data-ps-size="medium"] .pink-sync-immersive-container {
+  width: 160px;
+  height: 120px;
+}
+
+[data-ps-size="large"] .pink-sync-video-container,
+[data-ps-size="large"] .pink-sync-immersive-container {
+  width: 240px;
+  height: 180px;
+}
+
+/* Video position variations */
+[data-ps-position="floating"] .pink-sync-video-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+[data-ps-position="sidebar"] .pink-sync-video-container {
+  position: fixed;
+  right: 1rem;
+  top: 5rem;
+  z-index: 50;
+}
+
+/* Loading animation */
+@keyframes pinkSyncPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.pink-sync-loading {
+  animation: pinkSyncPulse 2s infinite;
+}
