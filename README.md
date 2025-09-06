@@ -1,4 +1,4 @@
-# 360 Magicians Platform 🧏✨
+# 360 Magicians + PinkSync Platform 🧏✨
 
 **Where Technology Meets Magic - Deaf-First Business Platform**
 
@@ -147,11 +147,6 @@ We welcome contributions from the deaf community and allies!
 - **Text**: [SMS Number] 
 - **Community**: community.360magicians.com
 
-## 🏆 Recognition
-
-- **Deaf Community Choice Award 2024**
-- **Accessibility Innovation Award**
-- **Best Deaf-First Platform**
 
 ## 📄 License
 
