@@ -1,6 +1,7 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
+  "name": "pinksync",
+  "version": "1.0.0",
+  "description": "PinkSync - Accessibility Orchestration Platform for Deaf Users",
   "private": true,
   "scripts": {
     "build": "next build",
