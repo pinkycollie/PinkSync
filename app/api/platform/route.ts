@@ -5,11 +5,14 @@
 import { NextResponse } from 'next/server';
 import { platformConfig } from '@/config/platform.config';
 import { eventOrchestrator } from '@/services/event-orchestrator';
-import { deafAuthService } from '@/services/deafauth';
 import { ragEngine } from '@/services/rag-engine';
 import { apiBroker } from '@/services/api-broker';
 import { pinkFlowEngine } from '@/services/pinkflow';
 import { workerSystem } from '@/services/workers';
+import { aslGlosser } from '@/services/asl-glosser';
+import { vcodeService } from '@/services/vcode';
+import { interpreterService } from '@/services/interpreters';
+import { signSpeakService } from '@/services/sign-speak';
 
 export async function GET() {
   try {
@@ -22,6 +25,10 @@ export async function GET() {
         apiBroker: apiBroker.getStats(),
         pinkFlow: pinkFlowEngine.getStats(),
         workers: workerSystem.getStats(),
+        aslGlosser: aslGlosser.getStats(),
+        vcode: vcodeService.getStats(),
+        interpreters: interpreterService.getStats(),
+        signSpeak: signSpeakService.getStats(),
       },
       deployment: platformConfig.deployment,
       timestamp: new Date().toISOString(),

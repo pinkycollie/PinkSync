@@ -24,6 +24,9 @@ export interface PlatformConfig {
     pinkFlow: boolean;
     signalSystem: boolean;
     notificator: boolean;
+    aslGlosser: boolean;
+    vcode: boolean;
+    interpreters: boolean;
   };
   services: {
     apiBaseUrl: string;
@@ -61,6 +64,9 @@ const defaultConfig: PlatformConfig = {
     pinkFlow: true,
     signalSystem: true,
     notificator: true,
+    aslGlosser: true,
+    vcode: true,
+    interpreters: true,
   },
   services: {
     apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
