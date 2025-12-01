@@ -1,0 +1,112 @@
+# Reusable workflow for building
+# This workflow can be called from other workflows to build the application
+
+name: Build (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        default: '18'
+        type: string
+      working-directory:
+        description: 'Working directory for the build operation'
+        required: false
+        default: '.'
+        type: string
+      environment:
+        description: 'Target environment (local, staging, production)'
+        required: false
+        default: 'local'
+        type: string
+      upload-artifact:
+        description: 'Upload build artifacts'
+        required: false
+        default: false
+        type: boolean
+      artifact-name:
+        description: 'Name for the build artifact'
+        required: false
+        default: 'build-output'
+        type: string
+    outputs:
+      build-status:
+        description: 'Status of the build'
+        value: ${{ jobs.build.outputs.status }}
+      build-time:
+        description: 'Time taken to build in seconds'
+        value: ${{ jobs.build.outputs.build-time }}
+
+# Reusable workflows inherit permissions from calling workflow
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build.outcome }}
+      build-time: ${{ steps.build-time.outputs.duration }}
+    env:
+      NODE_ENV: ${{ inputs.environment == 'production' && 'production' || 'development' }}
+      NEXT_PUBLIC_PLATFORM_ENV: ${{ inputs.environment == 'production' && 'standalone' || inputs.environment == 'staging' && 'standalone' || 'standalone' }}
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Start build timer
+        id: build-start
+        run: echo "start=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Build application
+        id: build
+        run: npm run build
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Calculate build time
+        id: build-time
+        run: |
+          END=$(date +%s)
+          DURATION=$((END - ${{ steps.build-start.outputs.start }}))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        if: inputs.upload-artifact && steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}-${{ inputs.environment }}
+          path: |
+            ${{ inputs.working-directory }}/.next
+            ${{ inputs.working-directory }}/out
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Report build results
+        run: |
+          echo "## Build Results (${{ inputs.environment }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.build.outcome }}" == "success" ]; then
+            echo "✅ Build successful" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏱️ Build time: ${{ steps.build-time.outputs.duration }} seconds" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.upload-artifact }}" == "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📦 Artifact: ${{ inputs.artifact-name }}-${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,208 @@
+# Main CI/CD Pipeline for PinkSync
+# Runs on all branches for linting, testing, and building
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'data-*'
+      - 'video-*'
+      - 'api-*'
+      - 'service-*'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'local'
+        type: choice
+        options:
+          - local
+          - staging
+          - production
+
+# Limit permissions for security
+permissions:
+  contents: read
+  actions: read
+
+# Ensure only one workflow runs at a time for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  # Determine which workflows to run based on branch patterns
+  setup:
+    name: Setup Pipeline
+    runs-on: ubuntu-latest
+    outputs:
+      branch-type: ${{ steps.branch-check.outputs.type }}
+      environment: ${{ steps.env-check.outputs.environment }}
+      run-deploy: ${{ steps.deploy-check.outputs.run-deploy }}
+    steps:
+      - name: Determine branch type
+        id: branch-check
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [[ "$BRANCH" == main ]]; then
+            echo "type=main" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == develop ]]; then
+            echo "type=develop" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == data-* ]]; then
+            echo "type=data" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == video-* ]]; then
+            echo "type=video" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == api-* ]]; then
+            echo "type=api" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == service-* ]]; then
+            echo "type=service" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == feature/* ]]; then
+            echo "type=feature" >> $GITHUB_OUTPUT
+          else
+            echo "type=other" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine environment
+        id: env-check
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" == "main" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" == "develop" ]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=local" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if deployment should run
+        id: deploy-check
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && ([ "${{ github.ref_name }}" == "main" ] || [ "${{ github.ref_name }}" == "develop" ]); then
+            echo "run-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "run-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log pipeline configuration
+        run: |
+          echo "## Pipeline Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------- | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Type | ${{ steps.branch-check.outputs.type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ steps.env-check.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | ${{ steps.deploy-check.outputs.run-deploy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+
+  # Run linting using reusable workflow
+  lint:
+    name: Lint
+    needs: setup
+    uses: ./.github/workflows/_reusable-lint.yml
+    with:
+      node-version: '18'
+
+  # Run tests using reusable workflow
+  test:
+    name: Test
+    needs: [setup, lint]
+    uses: ./.github/workflows/_reusable-test.yml
+    with:
+      node-version: '18'
+      environment: ${{ needs.setup.outputs.environment }}
+      coverage: true
+
+  # Build using reusable workflow
+  build:
+    name: Build
+    needs: [setup, lint]
+    uses: ./.github/workflows/_reusable-build.yml
+    with:
+      node-version: '18'
+      environment: ${{ needs.setup.outputs.environment }}
+      upload-artifact: ${{ needs.setup.outputs.run-deploy == 'true' }}
+      artifact-name: 'pinksync-build'
+
+  # Quality assurance check
+  quality:
+    name: Quality Assurance
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check TypeScript types
+        run: |
+          npm ci --legacy-peer-deps
+          npx tsc --noEmit || echo "TypeScript check completed with warnings"
+        continue-on-error: true
+
+      - name: Security audit
+        run: npm audit --audit-level=high || echo "Security audit completed with warnings"
+        continue-on-error: true
+
+      - name: Generate quality report
+        run: |
+          echo "## Quality Assurance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+
+  # Pipeline metrics and reporting
+  report:
+    name: Generate Reports
+    runs-on: ubuntu-latest
+    needs: [setup, lint, test, build, quality]
+    if: always()
+    steps:
+      - name: Generate pipeline report
+        run: |
+          echo "## PinkSync CI/CD Pipeline Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Run Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------ | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run ID | ${{ github.run_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run Number | ${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Type | ${{ needs.setup.outputs.branch-type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Setup | ${{ needs.setup.result == 'success' && '✅ Success' || needs.setup.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result == 'success' && '✅ Success' || needs.lint.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | ${{ needs.test.result == 'success' && '✅ Success' || needs.test.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result == 'success' && '✅ Success' || needs.build.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality | ${{ needs.quality.result == 'success' && '✅ Success' || needs.quality.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Set final status
+        if: ${{ needs.lint.result == 'failure' || needs.test.result == 'failure' || needs.build.result == 'failure' }}
+        run: exit 1

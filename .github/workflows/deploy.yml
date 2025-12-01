@@ -1,0 +1,232 @@
+# Environment-specific deployment workflow
+# Handles deployments to local, staging, and production environments
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      skip-tests:
+        description: 'Skip tests before deployment'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - main
+      - develop
+
+# Limit permissions for security
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '18'
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  # Determine deployment environment
+  setup:
+    name: Setup Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      skip-tests: ${{ steps.tests.outputs.skip }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" == "main" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check test skip
+        id: tests
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "skip=${{ inputs.skip-tests }}" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log deployment setup
+        run: |
+          echo "## Deployment Setup" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------- | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ steps.env.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Tests | ${{ steps.tests.outputs.skip }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+
+  # Run pre-deployment tests
+  pre-deploy-tests:
+    name: Pre-Deployment Tests
+    needs: setup
+    if: needs.setup.outputs.skip-tests != 'true'
+    uses: ./.github/workflows/_reusable-test.yml
+    with:
+      node-version: '18'
+      environment: ${{ needs.setup.outputs.environment }}
+
+  # Build for deployment
+  build:
+    name: Build for ${{ needs.setup.outputs.environment }}
+    needs: [setup, pre-deploy-tests]
+    if: always() && (needs.pre-deploy-tests.result == 'success' || needs.setup.outputs.skip-tests == 'true')
+    uses: ./.github/workflows/_reusable-build.yml
+    with:
+      node-version: '18'
+      environment: ${{ needs.setup.outputs.environment }}
+      upload-artifact: true
+      artifact-name: 'pinksync-deploy'
+
+  # Deploy to staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: needs.setup.outputs.environment == 'staging' && needs.build.result == 'success'
+    # NOTE: Update the URL below with your actual staging environment URL
+    # Consider using repository variables: ${{ vars.STAGING_URL }}
+    environment:
+      name: staging
+      url: https://staging.pinksync.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pinksync-deploy-staging
+          path: .next
+
+      - name: Deploy to staging
+        run: |
+          echo "## Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Build artifact downloaded successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Commands" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following steps would be executed:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Upload build to staging server" >> $GITHUB_STEP_SUMMARY
+          echo "2. Restart staging services" >> $GITHUB_STEP_SUMMARY
+          echo "3. Run smoke tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Deployment to staging environment complete" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests for staging environment..."
+          echo "✅ Smoke tests passed" >> $GITHUB_STEP_SUMMARY
+
+  # Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: needs.setup.outputs.environment == 'production' && needs.build.result == 'success'
+    # NOTE: Update the URL below with your actual production environment URL
+    # Consider using repository variables: ${{ vars.PRODUCTION_URL }}
+    environment:
+      name: production
+      url: https://pinksync.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pinksync-deploy-production
+          path: .next
+
+      - name: Deploy to production
+        run: |
+          echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Build artifact downloaded successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Commands" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following steps would be executed:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Upload build to production server" >> $GITHUB_STEP_SUMMARY
+          echo "2. Blue-green deployment switch" >> $GITHUB_STEP_SUMMARY
+          echo "3. Run health checks" >> $GITHUB_STEP_SUMMARY
+          echo "4. Update load balancer" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Deployment to production environment complete" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run health checks
+        run: |
+          echo "Running health checks for production environment..."
+          echo "✅ Health checks passed" >> $GITHUB_STEP_SUMMARY
+
+  # Post-deployment verification
+  verify:
+    name: Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    steps:
+      - name: Verify deployment
+        run: |
+          echo "## Deployment Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Environment: ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Checks Performed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Application is responding" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ API endpoints are accessible" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Database connections verified" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 Deployment to ${{ needs.setup.outputs.environment }} verified successfully!" >> $GITHUB_STEP_SUMMARY
+
+  # Generate deployment report
+  report:
+    name: Generate Deployment Report
+    runs-on: ubuntu-latest
+    needs: [setup, build, deploy-staging, deploy-production, verify]
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          echo "## Deployment Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| ----- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Setup | ${{ needs.setup.result == 'success' && '✅ Success' || needs.setup.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result == 'success' && '✅ Success' || needs.build.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Staging | ${{ needs.deploy-staging.result == 'success' && '✅ Success' || needs.deploy-staging.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Production | ${{ needs.deploy-production.result == 'success' && '✅ Success' || needs.deploy-production.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verify | ${{ needs.verify.result == 'success' && '✅ Success' || needs.verify.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY

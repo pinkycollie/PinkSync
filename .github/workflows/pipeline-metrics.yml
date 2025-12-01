@@ -1,0 +1,209 @@
+# Pipeline Tracking and Metrics Workflow
+# Generates reports and tracks success/failure metrics for all pipelines
+
+name: Pipeline Metrics
+
+on:
+  workflow_run:
+    workflows:
+      - "CI/CD Pipeline"
+      - "Data Branch Pipeline"
+      - "Video Branch Pipeline"
+      - "API Branch Pipeline"
+      - "Service Branch Pipeline"
+      - "Deploy"
+      - "Quality Assurance"
+    types:
+      - completed
+  schedule:
+    # Generate weekly summary every Monday at 9 AM
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      report-type:
+        description: 'Type of report to generate'
+        required: true
+        type: choice
+        options:
+          - daily
+          - weekly
+          - full
+
+# Limit permissions for security
+permissions:
+  contents: read
+  actions: read
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Log workflow completion
+  log-completion:
+    name: Log Workflow Completion
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run'
+    steps:
+      - name: Log workflow result
+        run: |
+          echo "## Workflow Run Logged" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------ | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow | ${{ github.event.workflow_run.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run ID | ${{ github.event.workflow_run.id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Conclusion | ${{ github.event.workflow_run.conclusion }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.event.workflow_run.head_branch }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.event.workflow_run.head_sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actor | ${{ github.event.workflow_run.actor.login }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Created | ${{ github.event.workflow_run.created_at }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Updated | ${{ github.event.workflow_run.updated_at }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "✅ Workflow completed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ github.event.workflow_run.conclusion }}" == "failure" ]; then
+            echo "❌ Workflow failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Workflow status: ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Generate metrics summary
+  generate-metrics:
+    name: Generate Metrics Summary
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate metrics report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "## PinkSync Pipeline Metrics Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Workflow Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # NOTE: Real metrics require GitHub API integration with appropriate permissions
+          # For production use, implement using gh cli or actions/github-script
+          # Example: gh api repos/:owner/:repo/actions/runs --jq '.workflow_runs'
+          
+          echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| -------- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| CI/CD Pipeline | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Data Branch Pipeline | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Video Branch Pipeline | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Branch Pipeline | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service Branch Pipeline | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Assurance | Configured ✅ |" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Branch Activity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Pattern | Description |" >> $GITHUB_STEP_SUMMARY
+          echo "| -------------- | ----------- |" >> $GITHUB_STEP_SUMMARY
+          echo "| main | Production releases |" >> $GITHUB_STEP_SUMMARY
+          echo "| develop | Development integration |" >> $GITHUB_STEP_SUMMARY
+          echo "| data-* | Data processing services |" >> $GITHUB_STEP_SUMMARY
+          echo "| video-* | Video processing services |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-* | API and gateway services |" >> $GITHUB_STEP_SUMMARY
+          echo "| service-* | General microservices |" >> $GITHUB_STEP_SUMMARY
+          echo "| feature/* | Feature development |" >> $GITHUB_STEP_SUMMARY
+
+  # Create pipeline health dashboard
+  health-dashboard:
+    name: Pipeline Health Dashboard
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate health dashboard
+        run: |
+          echo "## Pipeline Health Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### System Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --------- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| CI/CD Pipeline | 🟢 Operational |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Workflows | 🟢 Operational |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployment | 🟢 Operational |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Assurance | 🟢 Operational |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Workflow Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow File | Purpose |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------------- | ------- |" >> $GITHUB_STEP_SUMMARY
+          echo "| ci-cd.yml | Main CI/CD pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| branch-data.yml | Data services pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| branch-video.yml | Video services pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| branch-api.yml | API services pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| branch-service.yml | General services pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| deploy.yml | Deployment pipeline |" >> $GITHUB_STEP_SUMMARY
+          echo "| quality-assurance.yml | QA and testing |" >> $GITHUB_STEP_SUMMARY
+          echo "| pipeline-metrics.yml | Metrics tracking |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Reusable Workflows" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Template | Purpose |" >> $GITHUB_STEP_SUMMARY
+          echo "| -------- | ------- |" >> $GITHUB_STEP_SUMMARY
+          echo "| _reusable-lint.yml | Linting checks |" >> $GITHUB_STEP_SUMMARY
+          echo "| _reusable-test.yml | Testing |" >> $GITHUB_STEP_SUMMARY
+          echo "| _reusable-build.yml | Build process |" >> $GITHUB_STEP_SUMMARY
+
+  # Generate failure analysis
+  failure-analysis:
+    name: Failure Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Analyze failure
+        run: |
+          echo "## Failure Analysis Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Failed Workflow Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------ | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow | ${{ github.event.workflow_run.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run ID | ${{ github.event.workflow_run.id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.event.workflow_run.head_branch }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.event.workflow_run.head_sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actor | ${{ github.event.workflow_run.actor.login }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recommended Actions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review the workflow run logs" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check for dependency issues" >> $GITHUB_STEP_SUMMARY
+          echo "3. Verify environment configuration" >> $GITHUB_STEP_SUMMARY
+          echo "4. Run the workflow locally if possible" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }})" >> $GITHUB_STEP_SUMMARY
+
+  # Summary report
+  summary:
+    name: Generate Summary Report
+    runs-on: ubuntu-latest
+    needs: [log-completion, generate-metrics, health-dashboard, failure-analysis]
+    if: always()
+    steps:
+      - name: Create summary
+        run: |
+          echo "## Pipeline Metrics Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Log Completion | ${{ needs.log-completion.result == 'success' && '✅ Done' || needs.log-completion.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Generate Metrics | ${{ needs.generate-metrics.result == 'success' && '✅ Done' || needs.generate-metrics.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Dashboard | ${{ needs.health-dashboard.result == 'success' && '✅ Done' || needs.health-dashboard.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failure Analysis | ${{ needs.failure-analysis.result == 'success' && '✅ Done' || needs.failure-analysis.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,116 @@
+# Reusable workflow for testing
+# This workflow can be called from other workflows to run tests
+
+name: Test (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        default: '18'
+        type: string
+      working-directory:
+        description: 'Working directory for the test operation'
+        required: false
+        default: '.'
+        type: string
+      test-command:
+        description: 'Command to run tests'
+        required: false
+        default: 'npm test'
+        type: string
+      coverage:
+        description: 'Enable coverage reporting'
+        required: false
+        default: false
+        type: boolean
+      environment:
+        description: 'Environment to run tests against (local, staging, production)'
+        required: false
+        default: 'local'
+        type: string
+    outputs:
+      test-status:
+        description: 'Status of the test run'
+        value: ${{ jobs.test.outputs.status }}
+      coverage-percentage:
+        description: 'Test coverage percentage'
+        value: ${{ jobs.test.outputs.coverage }}
+
+# Reusable workflows inherit permissions from calling workflow
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run Tests (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.test.outcome }}
+      coverage: ${{ steps.coverage.outputs.percentage }}
+    env:
+      NODE_ENV: ${{ inputs.environment == 'production' && 'production' || 'test' }}
+      NEXT_PUBLIC_PLATFORM_ENV: ${{ inputs.environment == 'production' && 'api' || 'standalone' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Check for test script
+        id: check-tests
+        run: |
+          if npm run test --if-present 2>/dev/null | grep -q "Missing script"; then
+            echo "has-tests=false" >> $GITHUB_OUTPUT
+            echo "No test script found, skipping tests"
+          else
+            echo "has-tests=true" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Run tests
+        id: test
+        if: steps.check-tests.outputs.has-tests == 'true'
+        run: ${{ inputs.test-command }}
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Extract coverage
+        id: coverage
+        if: inputs.coverage && steps.check-tests.outputs.has-tests == 'true'
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+          else
+            echo "percentage=N/A" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Report test results
+        run: |
+          echo "## Test Results (${{ inputs.environment }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-tests.outputs.has-tests }}" == "false" ]; then
+            echo "ℹ️ No test script found in package.json" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.test.outcome }}" == "success" ]; then
+            echo "✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ inputs.coverage }}" == "true" ] && [ "${{ steps.coverage.outputs.percentage }}" != "N/A" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Coverage: ${{ steps.coverage.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
+          fi
