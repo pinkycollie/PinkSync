@@ -11,6 +11,10 @@ on:
     branches:
       - 'video-*'
 
+# Limit permissions for security
+permissions:
+  contents: read
+
 concurrency:
   group: video-${{ github.ref }}
   cancel-in-progress: true

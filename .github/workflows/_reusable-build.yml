@@ -39,6 +39,10 @@ on:
         description: 'Time taken to build in seconds'
         value: ${{ jobs.build.outputs.build-time }}
 
+# Reusable workflows inherit permissions from calling workflow
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build (${{ inputs.environment }})

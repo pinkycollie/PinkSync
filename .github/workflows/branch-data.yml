@@ -11,6 +11,10 @@ on:
     branches:
       - 'data-*'
 
+# Limit permissions for security
+permissions:
+  contents: read
+
 concurrency:
   group: data-${{ github.ref }}
   cancel-in-progress: true

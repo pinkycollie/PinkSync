@@ -23,6 +23,11 @@ on:
         default: true
         type: boolean
 
+# Limit permissions for security
+permissions:
+  contents: read
+  security-events: read
+
 concurrency:
   group: qa-${{ github.ref }}
   cancel-in-progress: true

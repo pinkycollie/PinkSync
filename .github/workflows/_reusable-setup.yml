@@ -29,6 +29,10 @@ on:
         description: 'Whether cache was hit'
         value: ${{ jobs.setup.outputs.cache-hit }}
 
+# Reusable workflows inherit permissions from calling workflow
+permissions:
+  contents: read
+
 jobs:
   setup:
     name: Setup Environment

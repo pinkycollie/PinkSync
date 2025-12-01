@@ -21,6 +21,11 @@ on:
         description: 'Status of the lint check'
         value: ${{ jobs.lint.outputs.status }}
 
+# Reusable workflows inherit permissions from calling workflow
+# But we can set defaults for direct usage
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Run Linting

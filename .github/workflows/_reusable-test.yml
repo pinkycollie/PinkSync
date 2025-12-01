@@ -39,6 +39,10 @@ on:
         description: 'Test coverage percentage'
         value: ${{ jobs.test.outputs.coverage }}
 
+# Reusable workflows inherit permissions from calling workflow
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run Tests (${{ inputs.environment }})

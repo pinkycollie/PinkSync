@@ -29,6 +29,11 @@ on:
           - staging
           - production
 
+# Limit permissions for security
+permissions:
+  contents: read
+  actions: read
+
 # Ensure only one workflow runs at a time for the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

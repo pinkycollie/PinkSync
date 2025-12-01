@@ -11,6 +11,10 @@ on:
     branches:
       - 'service-*'
 
+# Limit permissions for security
+permissions:
+  contents: read
+
 concurrency:
   group: service-${{ github.ref }}
   cancel-in-progress: true
