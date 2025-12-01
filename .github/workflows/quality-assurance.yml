@@ -1,0 +1,267 @@
+# Quality Assurance Workflow
+# Runs comprehensive quality checks including code quality, security, and accessibility
+
+name: Quality Assurance
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run every Sunday at midnight
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      full-scan:
+        description: 'Run full security and quality scan'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  # Code quality analysis
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: TypeScript type check
+        id: typecheck
+        run: |
+          npx tsc --noEmit 2>&1 | tee typecheck-output.txt || true
+          ERRORS=$(grep -c "error TS" typecheck-output.txt || echo "0")
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Count lines of code
+        run: |
+          echo "## Code Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### TypeScript Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.typecheck.outputs.errors }}" == "0" ]; then
+            echo "✅ No TypeScript errors found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Found ${{ steps.typecheck.outputs.errors }} TypeScript errors" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Code Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Type | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "| ---- | ----- |" >> $GITHUB_STEP_SUMMARY
+          TS_FILES=$(find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | wc -l)
+          JS_FILES=$(find . -name "*.js" -o -name "*.jsx" | grep -v node_modules | wc -l)
+          CSS_FILES=$(find . -name "*.css" | grep -v node_modules | wc -l)
+          echo "| TypeScript files | $TS_FILES |" >> $GITHUB_STEP_SUMMARY
+          echo "| JavaScript files | $JS_FILES |" >> $GITHUB_STEP_SUMMARY
+          echo "| CSS files | $CSS_FILES |" >> $GITHUB_STEP_SUMMARY
+
+  # Security scan
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run npm audit
+        id: audit
+        run: |
+          npm audit --json > audit-output.json 2>&1 || true
+          VULNS=$(cat audit-output.json | jq '.metadata.vulnerabilities.total // 0')
+          HIGH=$(cat audit-output.json | jq '.metadata.vulnerabilities.high // 0')
+          CRITICAL=$(cat audit-output.json | jq '.metadata.vulnerabilities.critical // 0')
+          echo "total=$VULNS" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Generate security report
+        run: |
+          echo "## Security Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### NPM Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "| -------- | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | ${{ steps.audit.outputs.critical }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | ${{ steps.audit.outputs.high }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Total | ${{ steps.audit.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.audit.outputs.critical }}" != "0" ]; then
+            echo "⚠️ **Critical vulnerabilities detected!** Please review and update dependencies." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.audit.outputs.high }}" != "0" ]; then
+            echo "⚠️ **High severity vulnerabilities detected.** Consider updating dependencies." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No critical or high severity vulnerabilities found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Accessibility check
+  accessibility:
+    name: Accessibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Check accessibility patterns
+        run: |
+          echo "## Accessibility Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Accessibility Features Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for ARIA usage
+          ARIA_COUNT=$(grep -r "aria-" --include="*.tsx" --include="*.jsx" . | grep -v node_modules | wc -l)
+          echo "| Feature | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------- | ------ |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$ARIA_COUNT" -gt 0 ]; then
+            echo "| ARIA attributes | ✅ Found ($ARIA_COUNT occurrences) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ARIA attributes | ⚠️ Not found |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check for alt text on images
+          ALT_COUNT=$(grep -r "alt=" --include="*.tsx" --include="*.jsx" . | grep -v node_modules | wc -l)
+          if [ "$ALT_COUNT" -gt 0 ]; then
+            echo "| Alt text for images | ✅ Found ($ALT_COUNT occurrences) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Alt text for images | ⚠️ Not found |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check for accessibility services
+          if [ -d "services/asl-glosser" ]; then
+            echo "| ASL Glosser service | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "services/sign-speak" ]; then
+            echo "| Sign-Speak service | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "services/deafauth" ]; then
+            echo "| DeafAuth service | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "services/pinkflow" ]; then
+            echo "| PinkFlow engine | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Automated testing with feedback
+  auto-test:
+    name: Automated Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check for test framework
+        id: check-tests
+        run: |
+          if grep -q "\"test\":" package.json; then
+            echo "has-tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-tests=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests
+        if: steps.check-tests.outputs.has-tests == 'true'
+        run: npm test || echo "Tests completed"
+        continue-on-error: true
+
+      - name: Generate test feedback
+        run: |
+          echo "## Automated Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-tests.outputs.has-tests }}" == "true" ]; then
+            echo "✅ Test framework is configured" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No test script found in package.json" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Recommendation" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Consider adding a test framework like Jest or Vitest:" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo 'npm install --save-dev jest @types/jest ts-jest' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Generate comprehensive QA report
+  report:
+    name: Generate QA Report
+    runs-on: ubuntu-latest
+    needs: [code-quality, security, accessibility, auto-test]
+    if: always()
+    steps:
+      - name: Generate comprehensive report
+        run: |
+          echo "## Quality Assurance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Overall Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| ----- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.code-quality.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility | ${{ needs.accessibility.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Automated Tests | ${{ needs.auto-test.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Run Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY

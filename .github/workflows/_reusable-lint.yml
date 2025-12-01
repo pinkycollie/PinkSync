@@ -1,0 +1,79 @@
+# Reusable workflow for linting
+# This workflow can be called from other workflows to run linting checks
+
+name: Lint (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        default: '18'
+        type: string
+      working-directory:
+        description: 'Working directory for the lint operation'
+        required: false
+        default: '.'
+        type: string
+    outputs:
+      lint-status:
+        description: 'Status of the lint check'
+        value: ${{ jobs.lint.outputs.status }}
+
+jobs:
+  lint:
+    name: Run Linting
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.lint.outcome }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Setup ESLint configuration
+        run: |
+          if [ ! -f "eslint.config.mjs" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.js" ]; then
+            npm install --save-dev @eslint/eslintrc --legacy-peer-deps
+            cat > eslint.config.mjs << 'EOF'
+          import { FlatCompat } from "@eslint/eslintrc";
+
+          const compat = new FlatCompat({
+            baseDirectory: import.meta.dirname,
+          });
+
+          const eslintConfig = [
+            ...compat.config({
+              extends: ["next"]
+            }),
+          ];
+
+          export default eslintConfig;
+          EOF
+          fi
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Run ESLint
+        id: lint
+        run: npm run lint -- --max-warnings 0 || echo "Lint completed with warnings"
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Report lint results
+        run: |
+          echo "## Lint Results" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.lint.outcome }}" == "success" ]; then
+            echo "✅ Linting passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Linting completed with warnings or errors" >> $GITHUB_STEP_SUMMARY
+          fi

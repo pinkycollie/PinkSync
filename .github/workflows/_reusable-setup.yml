@@ -1,0 +1,75 @@
+# Reusable workflow for environment setup
+# Prepares the runner environment with required tools and configurations
+
+name: Environment Setup (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        default: '18'
+        type: string
+      install-deps:
+        description: 'Install npm dependencies'
+        required: false
+        default: true
+        type: boolean
+      cache-deps:
+        description: 'Cache npm dependencies'
+        required: false
+        default: true
+        type: boolean
+    outputs:
+      node-version:
+        description: 'Actual Node.js version used'
+        value: ${{ jobs.setup.outputs.node-version }}
+      cache-hit:
+        description: 'Whether cache was hit'
+        value: ${{ jobs.setup.outputs.cache-hit }}
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    outputs:
+      node-version: ${{ steps.node-version.outputs.version }}
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: ${{ inputs.cache-deps && 'npm' || '' }}
+
+      - name: Get Node.js version
+        id: node-version
+        run: echo "version=$(node -v)" >> $GITHUB_OUTPUT
+
+      - name: Check cache
+        id: cache
+        uses: actions/cache@v4
+        if: inputs.cache-deps
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.node-version }}-
+
+      - name: Install dependencies
+        if: inputs.install-deps
+        run: npm ci --legacy-peer-deps
+
+      - name: Report setup status
+        run: |
+          echo "## Environment Setup" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------- | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js | ${{ steps.node-version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cache Hit | ${{ steps.cache.outputs.cache-hit || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependencies | ${{ inputs.install-deps && 'Installed' || 'Skipped' }} |" >> $GITHUB_STEP_SUMMARY
