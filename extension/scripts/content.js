@@ -149,18 +149,23 @@ function enableAutoCaptions() {
     enableVideoCaption(video);
   });
   
-  // YouTube specific
-  if (window.location.hostname.includes('youtube.com')) {
+  // YouTube specific - check for exact domain match
+  if (window.location.hostname === 'www.youtube.com' || 
+      window.location.hostname === 'youtube.com' ||
+      window.location.hostname === 'm.youtube.com') {
     enableYouTubeCaptions();
   }
   
-  // Netflix specific
-  if (window.location.hostname.includes('netflix.com')) {
+  // Netflix specific - check for exact domain match
+  if (window.location.hostname === 'www.netflix.com' || 
+      window.location.hostname === 'netflix.com') {
     enableNetflixCaptions();
   }
   
-  // Vimeo specific
-  if (window.location.hostname.includes('vimeo.com')) {
+  // Vimeo specific - check for exact domain match
+  if (window.location.hostname === 'vimeo.com' || 
+      window.location.hostname === 'www.vimeo.com' ||
+      window.location.hostname === 'player.vimeo.com') {
     enableVimeoCaptions();
   }
 }
@@ -223,13 +228,15 @@ function enableVimeoCaptions() {
 function applyPlatformSpecific() {
   const hostname = window.location.hostname;
   
-  // Zoom
-  if (hostname.includes('zoom.us')) {
+  // Zoom - check for exact domain match
+  if (hostname === 'zoom.us' || 
+      hostname === 'www.zoom.us' ||
+      hostname.endsWith('.zoom.us')) {
     applyZoomEnhancements();
   }
   
-  // Microsoft Teams
-  if (hostname.includes('teams.microsoft.com')) {
+  // Microsoft Teams - check for exact domain match
+  if (hostname === 'teams.microsoft.com') {
     applyTeamsEnhancements();
   }
   
@@ -285,6 +292,7 @@ function applyTeamsEnhancements() {
 
 /**
  * Check if site is a hotel booking site
+ * Uses exact or subdomain matching for security
  */
 function isHotelBookingSite(hostname) {
   const hotelSites = [
@@ -296,7 +304,13 @@ function isHotelBookingSite(hostname) {
     'hyatt.com',
     'airbnb.com',
   ];
-  return hotelSites.some(site => hostname.includes(site));
+  
+  // Check for exact match or valid subdomain (e.g., www.booking.com)
+  return hotelSites.some(site => 
+    hostname === site || 
+    hostname === 'www.' + site ||
+    hostname.endsWith('.' + site)
+  );
 }
 
 /**
