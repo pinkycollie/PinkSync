@@ -5,6 +5,11 @@
 
 // Import routes
 import { handler as platformHandler } from "./routes/api/platform.ts";
+import { handler as authHandler } from "./routes/api/auth.ts";
+import { handler as workersHandler } from "./routes/api/workers.ts";
+import { handler as transformHandler } from "./routes/api/transform.ts";
+import { handler as researchHandler } from "./routes/api/research.ts";
+import { handler as providersHandler } from "./routes/api/providers.ts";
 
 const PORT = parseInt(Deno.env.get("PORT") || "8000");
 
@@ -16,6 +21,42 @@ async function router(req: Request): Promise<Response> {
   // API Routes
   if (path === "/api/platform" && req.method === "GET") {
     return await platformHandler.GET(req);
+  }
+  
+  if (path === "/api/auth" && req.method === "POST") {
+    return await authHandler.POST(req);
+  }
+  
+  if (path === "/api/workers") {
+    if (req.method === "GET") {
+      return await workersHandler.GET(req);
+    } else if (req.method === "POST") {
+      return await workersHandler.POST(req);
+    }
+  }
+  
+  if (path === "/api/transform") {
+    if (req.method === "GET") {
+      return await transformHandler.GET(req);
+    } else if (req.method === "POST") {
+      return await transformHandler.POST(req);
+    }
+  }
+  
+  if (path === "/api/research") {
+    if (req.method === "GET") {
+      return await researchHandler.GET(req);
+    } else if (req.method === "POST") {
+      return await researchHandler.POST(req);
+    }
+  }
+  
+  if (path === "/api/providers") {
+    if (req.method === "GET") {
+      return await providersHandler.GET(req);
+    } else if (req.method === "POST") {
+      return await providersHandler.POST(req);
+    }
   }
 
   // Static files
