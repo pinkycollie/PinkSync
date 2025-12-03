@@ -5,7 +5,9 @@
  */
 
 // Configuration
-const DEAFAUTH_API_URL = 'https://your-deafauth-api.com'; // Update in production
+// For production, update this to your production API URL
+// For development, use http://localhost:3000
+const DEAFAUTH_API_URL = 'http://localhost:3000'; // Change to production URL before publishing
 const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 // State management

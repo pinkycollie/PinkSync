@@ -53,6 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkbox.addEventListener('change', handlePreferenceChange);
   });
   
+  // Register link
+  const registerLink = document.getElementById('register-link');
+  registerLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: 'http://localhost:3000' }); // Update to production URL
+  });
+  
   // Check authentication status
   await checkAuthStatus();
 });
@@ -243,8 +250,8 @@ async function handlePreferenceChange(e) {
  * Open full settings in DeafAUTH
  */
 function openFullSettings() {
-  // In production, this would open the DeafAUTH settings page
-  chrome.tabs.create({ url: 'https://your-deafauth-api.com/settings' });
+  // In production, update to your production URL
+  chrome.tabs.create({ url: 'http://localhost:3000' }); // Change to production URL
 }
 
 /**
