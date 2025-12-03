@@ -1,0 +1,22 @@
+# Dockerfile for Deno DeafAUTH
+# Lightweight container for running Deno applications
+
+FROM denoland/deno:alpine-1.40.0
+
+# Set working directory
+WORKDIR /app
+
+# Copy application files
+COPY deno-deafauth/ .
+
+# Cache dependencies
+RUN deno cache mod.ts routes.ts
+
+# Set user to non-root
+USER deno
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "mod.ts"]

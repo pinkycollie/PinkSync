@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Next.js PinkSync Application
+  pinksync-nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pinksync-nextjs
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pinksync-network
+
+  # Deno DeafAUTH Service
+  deafauth-deno:
+    build:
+      context: .
+      dockerfile: Dockerfile.deno
+    container_name: deafauth-deno
+    ports:
+      - "8000:8000"
+    environment:
+      - DENO_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pinksync-network
+
+  # Redis (optional - for session storage)
+  redis:
+    image: redis:7-alpine
+    container_name: pinksync-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pinksync-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: pinksync-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - pinksync-nextjs
+      - deafauth-deno
+    restart: unless-stopped
+    networks:
+      - pinksync-network
+
+networks:
+  pinksync-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

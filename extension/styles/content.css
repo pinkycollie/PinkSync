@@ -1,0 +1,41 @@
+/* PinkSync Content Script Styles */
+
+/* Base accessibility classes */
+.pinksync-active {
+  /* Applied when PinkSync is active */
+}
+
+.pinksync-simplified-text {
+  /* Text simplification styles */
+  line-height: 1.6 !important;
+  word-spacing: 0.1em !important;
+}
+
+.pinksync-visual-enhanced {
+  /* Visual enhancement styles applied via injected style tag */
+}
+
+/* Dark mode */
+.pinksync-dark-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.pinksync-dark-mode img,
+.pinksync-dark-mode video,
+.pinksync-dark-mode iframe {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* High contrast mode */
+.pinksync-high-contrast {
+  filter: contrast(1.5);
+}
+
+.pinksync-high-contrast * {
+  border-color: #000 !important;
+}
+
+/* Notification styles */
+.pinksync-notification {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
+}
