@@ -8,7 +8,7 @@
  * as ASL has a different grammatical structure than English.
  */
 
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 export interface SimplificationRequest {
   id: string;

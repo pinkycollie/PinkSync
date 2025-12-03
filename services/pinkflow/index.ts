@@ -5,8 +5,8 @@
  * for deaf users across all platforms.
  */
 
-import { ContentTransformation, TransformationType, TransformationMetadata, AccessibilityPreferences } from '@/types';
-import { events } from '@/services/event-orchestrator';
+import { ContentTransformation, TransformationType, TransformationMetadata, AccessibilityPreferences } from '@/types/index.ts';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 class PinkFlowEngine {
   private transformations: Map<string, ContentTransformation> = new Map();

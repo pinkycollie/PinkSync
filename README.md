@@ -2,6 +2,8 @@
 
 PinkSync is a comprehensive Layer 1 accessibility orchestration platform designed specifically for deaf users. It acts as a unified gateway connecting deaf communities with accessible services, products, and programs while providing real-time accessibility enhancements across multiple environments.
 
+> **🚀 Now powered by Deno!** PinkSync has been migrated from Next.js to Deno for a more lightweight, modern, and efficient runtime. No build step required, native TypeScript support, and significantly faster performance.
+
 ## 🎯 Core Concept
 
 PinkSync consists of two primary components working together:
@@ -48,21 +50,56 @@ Together, they provide seamless accessibility:
 #### Prerequisites
 - Node.js 18+
 - npm or pnpm
+### Prerequisites
+- Deno 1.45+ ([Install Deno](https://deno.land/manual/getting_started/installation))
+- No Node.js or npm required!
 
 #### Installation
 
 ```bash
-# Install dependencies
-npm install --legacy-peer-deps
+# Clone the repository
+git clone https://github.com/pinkycollie/PinkSync.git
+cd PinkSync
 
-# Development mode
-npm run dev
+# No installation step needed - Deno handles dependencies automatically!
 
-# Build for production
-npm run build
+# Development mode (with hot reload)
+deno task dev
 
-# Start production server
-npm start
+# Production mode
+deno task start
+
+# The server will start on http://localhost:8000
+```
+
+### Why Deno?
+
+PinkSync migrated from Next.js to Deno to provide:
+- ⚡ **Zero build step** - Run TypeScript directly
+- 🔒 **Secure by default** - Explicit permissions for network, file system, etc.
+- 🎯 **Native TypeScript** - No transpilation needed
+- 📦 **No node_modules** - Dependencies loaded from URLs
+- 🚀 **Faster startup** - Instant server start
+- 🌐 **Web standards** - Built-in fetch, Request, Response
+- 💪 **Modern runtime** - Latest JavaScript/TypeScript features
+
+### Development
+
+```bash
+# Run development server with watch mode
+deno task dev
+
+# Check code formatting
+deno fmt
+
+# Lint code
+deno lint
+
+# Type check
+deno check server.ts
+
+# Run tests (if any)
+deno test
 ```
 
 ### Browser Extension Setup
@@ -167,6 +204,25 @@ PinkSync maintains a RAG (Retrieval-Augmented Generation) system that:
 /docs                   - Documentation
   architecture-complete.md - Complete system architecture
   api-gateway.md       - API documentation for extension
+/routes                  - Deno server routes
+  /api                   - API endpoints
+/services                - Business logic and services
+  /event-orchestrator    - Event handling system
+  /deafauth              - Authentication services
+  /rag-engine            - Research and learning system
+  /workers               - Background job processors
+  /api-broker            - Partner API integrations
+  /pinkflow              - Accessibility engine
+  /asl-glosser           - ASL glossing service
+  /vcode                 - Video communication service
+  /interpreters          - Interpreter booking service
+  /sign-speak            - Sign language service
+/config                  - Environment configurations
+/types                   - TypeScript type definitions
+/public                  - Static assets
+/docs                    - Documentation
+server.ts                - Main Deno server entry point
+deno.json                - Deno configuration and tasks
 ```
 
 ## 🤖 Background Workers

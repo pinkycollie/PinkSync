@@ -3,9 +3,14 @@
 # dependencies
 /node_modules
 
-# next.js
+# Deno
+.deno/
+
+# next.js (legacy - will be removed)
 /.next/
 /out/
+next.config.mjs
+next-env.d.ts
 
 # production
 /build

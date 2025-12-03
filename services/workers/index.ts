@@ -5,8 +5,8 @@
  * research indexing, and other asynchronous tasks.
  */
 
-import { BackgroundJob, JobType, JobStatus } from '@/types';
-import { events } from '@/services/event-orchestrator';
+import { BackgroundJob, JobType, JobStatus } from '@/types/index.ts';
+import { events } from '@/services/event-orchestrator/index.ts';
 import { pinkFlowEngine } from '@/services/pinkflow';
 import { ragEngine } from '@/services/rag-engine';
 import { apiBroker } from '@/services/api-broker';
