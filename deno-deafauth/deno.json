@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "check": "deno fmt --check && deno lint",
+    "test": "deno test --allow-all",
+    "dev": "deno run --allow-net --allow-read --watch mod.ts"
+  },
+  "imports": {
+    "$fresh/": "https://deno.land/x/fresh@1.6.1/"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}
