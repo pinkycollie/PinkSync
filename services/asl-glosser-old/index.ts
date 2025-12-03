@@ -5,7 +5,7 @@
  * Links users with external ASL resources and the mbtq-dev/video-creators service.
  */
 
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 export interface ASLContentProvider {
   id: string;
@@ -155,7 +155,7 @@ class ASLGlosserService {
     // In production, this calls the actual video-creators service
     // github.com/mbtq-dev/video-creators
     
-    const videoCreatorEndpoint = process.env.VIDEO_CREATOR_API_URL || 'https://video-creators.mbtq.dev/api';
+    const videoCreatorEndpoint = Deno.env.get("VIDEO_CREATOR_API_URL") || 'https://video-creators.mbtq.dev/api';
     
     try {
       // Simulate API call to video-creators
@@ -200,7 +200,7 @@ class ASLGlosserService {
       userId?: string;
     }
   ): Promise<VideoCreationRequest> {
-    const signSpeakEndpoint = process.env.SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
+    const signSpeakEndpoint = Deno.env.get("SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
     
     const requestId = this.generateId('sign-speak');
     const request: VideoCreationRequest = {
@@ -223,7 +223,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${process.env.SIGN_SPEAK_API_KEY}`,
+      //     'Authorization': `Bearer ${Deno.env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     text,
@@ -263,7 +263,7 @@ class ASLGlosserService {
     confidence: number;
     alternates?: string[];
   }> {
-    const signSpeakEndpoint = process.env.SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
+    const signSpeakEndpoint = Deno.env.get("SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
 
     try {
       // Call Sign-Speak API
@@ -271,7 +271,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${process.env.SIGN_SPEAK_API_KEY}`,
+      //     'Authorization': `Bearer ${Deno.env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     videoUrl,
@@ -306,7 +306,7 @@ class ASLGlosserService {
       userId?: string;
     }
   ): Promise<VideoCreationRequest> {
-    const signSpeakEndpoint = process.env.SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
+    const signSpeakEndpoint = Deno.env.get("SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
     
     const requestId = this.generateId('voice-to-sign');
     const request: VideoCreationRequest = {
@@ -329,7 +329,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${process.env.SIGN_SPEAK_API_KEY}`,
+      //     'Authorization': `Bearer ${Deno.env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     audioUrl,

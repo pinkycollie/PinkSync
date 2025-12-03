@@ -5,7 +5,7 @@
  * Manages event routing, processing, and distribution across all services.
  */
 
-import { PlatformEvent, EventType, EventSource } from '@/types';
+import { PlatformEvent, EventType, EventSource } from '@/types/index.ts';
 
 type EventHandler = (event: PlatformEvent) => void | Promise<void>;
 
