@@ -43,6 +43,220 @@ Together, they provide seamless accessibility:
 5. **API Broker**: Unified gateway to partner services
 6. **PinkFlow Engine**: Real-time accessibility adjustments
 
+## 🧩 Microservices Ecosystem
+
+PinkSync is built as a comprehensive microservices platform with features distributed across multiple branches. Below is the complete catalog of all services and features available in the PinkSync ecosystem.
+
+### Core Microservices (Main Platform)
+
+#### 🔐 **deafauth**
+Visual-first authentication and preference management system
+- Sign language video authentication
+- User profile and accessibility settings storage
+- Multi-device deaf profile synchronization
+- Visual biometric patterns
+- Deaf cultural identity support
+
+#### 🎯 **event-orchestrator**
+Node-based event listener and processing architecture
+- Real-time event handling across platforms
+- User interaction processing
+- Content change detection
+- System notification management
+
+#### 🤖 **rag-engine**
+Research-Augmented Generation system for accessibility learning
+- Vector database of deaf accessibility research
+- Community feedback aggregation
+- Real-world usage pattern analysis
+- Continuous recommendation improvements
+
+#### 👷 **workers**
+Background job processors for automation
+- Content transformation
+- Real-time accessibility analysis
+- Provider service matching
+- Research data processing
+- Community voice aggregation
+
+#### 🌉 **api-broker**
+Unified gateway for partner service integrations
+- Vocational rehabilitation services
+- Educational resources
+- Employment opportunities
+- Community services
+- Healthcare providers
+
+#### 🌊 **pinkflow**
+Real-time accessibility adjustment engine
+- Dynamic content transformation
+- User preference application
+- Visual enhancement processing
+- Sign language integration
+
+#### 🤟 **asl-glosser**
+ASL (American Sign Language) glossing service
+- Sign language processing
+- ASL-to-text conversion
+- Cultural context preservation
+- Multi-dialect support
+
+#### 🗣️ **sign-speak**
+Comprehensive sign language service
+- Sign language recognition
+- Real-time interpretation
+- Multiple sign language support (ASL, BSL, ISL, etc.)
+- Visual gesture analysis
+
+#### 📹 **vcode** (Video Communication)
+Core video communication service
+- Deaf-first video calling
+- Real-time visual communication
+- Platform integration (Google Meet, Zoom, Teams, WebEx)
+- Evidence generation for legal/medical meetings
+
+#### 👥 **interpreters**
+Interpreter booking and management service
+- Sign language interpreter scheduling
+- Availability management
+- Booking coordination
+- Session recording and documentation
+
+### Extended Microservices (Feature Branches)
+
+#### 🎭 **360 Magicians Platform** (`integrated-360-Magicians`)
+Comprehensive deaf-first business ecosystem
+
+**accessibility-api**
+- WCAG AAA compliant interface APIs
+- Visual feedback systems
+- Deaf-first design patterns
+- Multi-modal accessibility features
+
+**deaf-first-identity**
+- Deaf cultural identity management
+- Community networking
+- Cultural celebration alerts
+- Deaf advocacy tools
+
+**sign-language-auth**
+- Advanced sign language authentication
+- Video-based identity verification
+- Cultural competency validation
+- Secure deaf-centric access control
+
+#### 🎥 **VCode Platform** (`vcode`)
+Advanced video and AI-powered communication
+
+**ai-service**
+- Groq AI integration
+- Whisper-large-v3 for transcription
+- Specialized models (Medical, Legal, Technical)
+- Real-time AI assistance
+- ASL processing AI
+
+**content-service**
+- Content management and delivery
+- Multi-modal evidence generation
+- Meeting content analysis
+- Transcription services
+
+**user-service**
+- User profile management
+- Preference storage
+- Session management
+- Deaf user experience customization
+
+**vr-service**
+- Virtual reality accessibility features
+- Immersive sign language environments
+- 3D visual communication spaces
+- VR meeting accessibility
+
+#### 📊 **Analytics & Performance** (`videoized`)
+
+**pink-sync-analytics**
+- Usage analytics and insights
+- Accessibility metrics tracking
+- User engagement monitoring
+- Platform performance analysis
+
+**pink-sync-preloader**
+- Resource preloading optimization
+- Fast initial load times
+- Asset management
+- Performance enhancement
+
+### Feature-Specific Services
+
+#### 📱 **QR Code & Holograms** (`QR-Code-Holograms`)
+- QR code scanning and processing
+- AR sign language holograms
+- Visual information accessibility
+- Library management system
+- API endpoints: `/api/scanqr/*`
+
+#### 📝 **Registration System** (`REGISTRATION`)
+- User registration workflows
+- Sign-in/sign-up pages
+- Password recovery
+- Account management
+
+#### ✅ **VCode API Verification** (`add-new-feature-vcode`)
+- Comprehensive API testing suite
+- Endpoint verification
+- Integration testing
+- API quality assurance
+
+#### 🎛️ **Admin Console** (`admin-console`)
+- Platform administration interface
+- Data seeding and management
+- System configuration
+- User management tools
+
+#### ⚙️ **Video Processing** (`data-processor-worker`, `video-processor`)
+- Mux video processing integration
+- Real-time video analytics
+- Queue-based job processing
+- Multi-tenant video support
+- WebSocket communication
+- Professional video features
+
+#### 🏢 **DeafLifeOS Integration** (`deaflifeos`)
+- DeafLifeOS platform fork
+- Comprehensive deaf life management
+- Daily living assistance
+- Community resources
+
+#### 🏢 **Enterprise Features** (`enterprise-page`)
+- Developer sign language support
+- Enterprise-grade accessibility
+- Business integration tools
+- Corporate deaf accessibility
+
+#### 💬 **Communication Automation** (`fear-explainer-content-generator`)
+- Automated communication systems
+- Content generation for accessibility
+- Fear/anxiety explainer tools
+- Simplified communication
+
+#### 📋 **Queue Processing** (`new-feat-queue-processing`)
+- Video processing job queues
+- Asynchronous task management
+- Background job scheduling
+- API route: `/api/queue/*`
+
+#### 🆕 **New Sectors** (`new-sectors`)
+- Expansion into new industry sectors
+- Developer tooling for sign language
+- Industry-specific accessibility
+
+#### 👁️ **VisualDesk Integration** (`visualdesk`)
+- VisualDesk platform integration
+- Desktop accessibility features
+- VCode API integration
+- Workspace accessibility tools
+
 ## 🚀 Getting Started
 
 ### Backend Setup
@@ -138,6 +352,41 @@ PinkSync supports multiple deployment environments:
 
 See `config/` directory for environment-specific configurations.
 
+### Working with Feature Branches
+
+To explore or work with specific microservices from feature branches:
+
+```bash
+# List all available feature branches
+git branch -r | grep origin/
+
+# Check out a specific feature branch
+git checkout -b <branch-name> origin/<branch-name>
+
+# Example: Check out the VCode platform
+git checkout -b vcode origin/vcode
+
+# Example: Check out 360 Magicians
+git checkout -b integrated-360-Magicians origin/integrated-360-Magicians
+
+# View services in the current branch
+ls -la services/
+```
+
+### Microservice Deployment
+
+Each microservice can be deployed independently:
+
+```bash
+# Deploy a specific service (example with Docker)
+cd services/<service-name>
+docker build -t pinksync-<service-name> .
+docker run -p 8000:8000 pinksync-<service-name>
+
+# Or use the centralized deployment
+docker-compose up <service-name>
+```
+
 ## 🌐 Integration with mbtq.dev
 
 PinkSync is designed to work seamlessly with the mbtq.dev ecosystem, providing:
@@ -184,46 +433,69 @@ PinkSync maintains a RAG (Retrieval-Augmented Generation) system that:
 ### Project Structure
 
 ```
-/app                    - Next.js application pages
-/components             - React components
-/config                 - Environment configurations
-/extension              - Browser extension (NEW!)
-  /scripts              - Background worker, content scripts
-  /styles               - Extension CSS
-  /icons                - Extension icons
-  manifest.json         - Extension configuration
-/lib                    - Utility libraries
-/services               - Business logic and services
-  /event-orchestrator   - Event handling system
-  /deafauth            - Authentication services
-  /rag-engine          - Research and learning system
-  /workers             - Background job processors
-  /api-broker          - Partner API integrations
-  /pinkflow            - Accessibility engine
-/public                 - Static assets
-/docs                   - Documentation
-  architecture-complete.md - Complete system architecture
-  api-gateway.md       - API documentation for extension
-/routes                  - Deno server routes
-  /api                   - API endpoints
-/services                - Business logic and services
-  /event-orchestrator    - Event handling system
-  /deafauth              - Authentication services
-  /rag-engine            - Research and learning system
-  /workers               - Background job processors
-  /api-broker            - Partner API integrations
-  /pinkflow              - Accessibility engine
-  /asl-glosser           - ASL glossing service
-  /vcode                 - Video communication service
-  /interpreters          - Interpreter booking service
-  /sign-speak            - Sign language service
-/config                  - Environment configurations
-/types                   - TypeScript type definitions
-/public                  - Static assets
-/docs                    - Documentation
-server.ts                - Main Deno server entry point
-deno.json                - Deno configuration and tasks
+/app                        - Next.js application pages
+/components                 - React components
+/config                     - Environment configurations
+/extension                  - Browser extension
+  /scripts                  - Background worker, content scripts
+  /styles                   - Extension CSS
+  /icons                    - Extension icons
+  manifest.json             - Extension configuration
+/lib                        - Utility libraries
+/routes                     - Deno server routes
+  /api                      - API endpoints
+/services                   - Microservices (see Microservices Ecosystem above)
+  /event-orchestrator       - Event handling system
+  /deafauth                 - Authentication services
+  /rag-engine               - Research and learning system
+  /workers                  - Background job processors
+  /api-broker               - Partner API integrations
+  /pinkflow                 - Accessibility engine
+  /asl-glosser              - ASL glossing service
+  /vcode                    - Video communication service
+  /interpreters             - Interpreter booking service
+  /sign-speak               - Sign language service
+  /accessibility-api        - (360 Magicians) Accessibility APIs
+  /deaf-first-identity      - (360 Magicians) Identity management
+  /sign-language-auth       - (360 Magicians) Sign language authentication
+  /ai-service               - (VCode) AI and ML services
+  /content-service          - (VCode) Content management
+  /user-service             - (VCode) User management
+  /vr-service               - (VCode) Virtual reality features
+  /pink-sync-analytics.ts   - (Videoized) Analytics service
+  /pink-sync-preloader.ts   - (Videoized) Performance optimization
+/config                     - Environment configurations
+/types                      - TypeScript type definitions
+/public                     - Static assets
+/docs                       - Documentation
+  architecture-complete.md  - Complete system architecture
+  api-gateway.md            - API documentation for extension
+server.ts                   - Main Deno server entry point
+deno.json                   - Deno configuration and tasks
 ```
+
+### Branch-Based Features
+
+The PinkSync platform uses feature branches for developing and testing new microservices:
+
+- **`feat-Pinksync-AI`** - Main branch with core platform and browser extension
+- **`integrated-360-Magicians`** - 360 Magicians deaf-first business platform
+- **`vcode`** - Advanced video communication with Groq AI integration
+- **`QR-Code-Holograms`** - QR code scanning and AR hologram features
+- **`REGISTRATION`** - Enhanced authentication and registration system
+- **`add-new-feature-vcode`** - VCode API verification suite
+- **`admin-console`** - Platform administration interface
+- **`data-processor-worker`** - Video processing with Mux integration
+- **`video-processor`** - Multi-tenant video support
+- **`videoized`** - Analytics and performance optimization
+- **`deaflifeos`** - DeafLifeOS integration
+- **`enterprise-page`** - Enterprise features and developer tools
+- **`fear-explainer-content-generator`** - Communication automation
+- **`new-feat-queue-processing`** - Job queue processing
+- **`new-sectors`** - Industry sector expansion
+- **`visualdesk`** - VisualDesk desktop integration
+
+Each branch represents a modular feature set that can be independently developed, tested, and deployed.
 
 ## 🤖 Background Workers
 
@@ -252,6 +524,225 @@ The event listener architecture processes:
 - Custom user preferences
 - Persistent profiles
 
+## 🚀 Recommended Modern Tools & Integrations
+
+Based on PinkSync's microservices architecture and deaf-first mission, here are cutting-edge tools we recommend integrating:
+
+### 🎯 **Priority Integrations** (High Impact)
+
+#### 1. **LiveKit** - Real-time Video Infrastructure
+- **Purpose**: Replace/enhance current video communication
+- **Benefits**: Open-source WebRTC, built-in recording, low latency
+- **Use Case**: Better video calls for VCode service
+- **Integration**: New microservice `services/livekit-bridge`
+```bash
+npm create livekit-app@latest
+```
+
+#### 2. **Qdrant Vector Database** - Enhanced RAG Engine
+- **Purpose**: Upgrade rag-engine with better semantic search
+- **Benefits**: Self-hostable, fast similarity search, sign language embeddings
+- **Use Case**: Improved accessibility research recommendations
+- **Integration**: Replace current RAG backend
+```bash
+docker pull qdrant/qdrant
+```
+
+#### 3. **MediaPipe (Google)** - Sign Language Recognition
+- **Purpose**: Real-time hand tracking and pose estimation
+- **Benefits**: Accurate ASL detection, runs in browser, free
+- **Use Case**: New service for real-time sign language recognition
+- **Integration**: New microservice `services/mediapipe-asl`
+```typescript
+npm install @mediapipe/hands @mediapipe/pose
+```
+
+#### 4. **Kong Gateway** - API Gateway Replacement
+- **Purpose**: Professional API gateway to replace api-broker
+- **Benefits**: Plugin ecosystem, rate limiting, auth, analytics
+- **Use Case**: Central gateway for all microservices
+- **Integration**: Replace/enhance api-broker
+```bash
+docker pull kong/kong-gateway
+```
+
+#### 5. **Supabase** - Backend-as-a-Service
+- **Purpose**: PostgreSQL + real-time + auth + storage
+- **Benefits**: Real-time subscriptions, row-level security, built-in auth
+- **Use Case**: Unified backend for deafauth and user management
+- **Integration**: New microservice `services/supabase-sync`
+```bash
+npx supabase init
+```
+
+### 🔥 **High-Value Additions**
+
+#### 6. **AssemblyAI** - Advanced Speech Recognition
+- **Purpose**: Better than Whisper for meeting transcription
+- **Benefits**: Speaker diarization, sentiment analysis, topic detection
+- **Use Case**: Enhanced VCode meeting transcription
+- **Integration**: Add to ai-service
+```typescript
+npm install assemblyai
+```
+
+#### 7. **Deno Deploy** - Edge Computing
+- **Purpose**: Deploy Deno services globally with low latency
+- **Benefits**: Perfect for current Deno architecture, automatic scaling
+- **Use Case**: Edge deployment for pinkflow and event-orchestrator
+- **Integration**: Native deployment for existing services
+
+#### 8. **Redis Streams** - Event Streaming
+- **Purpose**: Lightweight event streaming for event-orchestrator
+- **Benefits**: In-memory speed, pub/sub, persistence
+- **Use Case**: Replace current event system with scalable streaming
+- **Integration**: Upgrade event-orchestrator
+```bash
+npm install ioredis
+```
+
+### 🎨 **Accessibility & UI Enhancements**
+
+#### 9. **Radix UI** - Accessible Components
+- **Purpose**: WCAG-compliant UI primitives
+- **Benefits**: Headless, customizable, accessible by default
+- **Use Case**: Browser extension and web app UI
+- **Integration**: Replace current component library
+```bash
+npm install @radix-ui/react-*
+```
+
+#### 10. **axe-core** - Accessibility Testing
+- **Purpose**: Automated accessibility audits
+- **Benefits**: WCAG compliance checking, CI/CD integration
+- **Use Case**: Ensure all features meet accessibility standards
+- **Integration**: Add to testing pipeline
+```bash
+npm install @axe-core/playwright
+```
+
+### 🧠 **AI & Machine Learning**
+
+#### 11. **Vercel AI SDK** - AI Assistant Framework
+- **Purpose**: Build AI assistants and chatbots
+- **Benefits**: Streaming responses, multiple providers, edge support
+- **Use Case**: Intelligent accessibility assistant
+- **Integration**: New microservice `services/ai-assistant`
+```bash
+npm install ai
+```
+
+#### 12. **TensorFlow.js** - Browser-based ML
+- **Purpose**: Client-side sign language recognition
+- **Benefits**: Privacy-preserving, no server needed, hardware accelerated
+- **Use Case**: Browser extension ASL detection
+- **Integration**: Add to extension/scripts
+```bash
+npm install @tensorflow/tfjs
+```
+
+### 📊 **Monitoring & DevOps**
+
+#### 13. **Grafana + Prometheus** - Observability Stack
+- **Purpose**: System monitoring and metrics
+- **Benefits**: Custom dashboards, alerting, service health
+- **Use Case**: Monitor all microservices performance
+- **Integration**: New infrastructure service
+```bash
+docker-compose up prometheus grafana
+```
+
+#### 14. **Sentry** - Error Tracking
+- **Purpose**: Real-time error monitoring
+- **Benefits**: Performance monitoring, user feedback, replay sessions
+- **Use Case**: Track bugs and performance issues
+- **Integration**: Add to all services
+```bash
+npm install @sentry/deno @sentry/react
+```
+
+### 🏗️ **Development Tools**
+
+#### 15. **Turborepo** - Monorepo Management
+- **Purpose**: High-performance build system
+- **Benefits**: Smart caching, parallel execution, remote caching
+- **Use Case**: Manage all microservices in one repo
+- **Integration**: Restructure project as monorepo
+```bash
+npx create-turbo@latest
+```
+
+#### 16. **Backstage (Spotify)** - Developer Portal
+- **Purpose**: Internal developer platform
+- **Benefits**: Service catalog, documentation, templates
+- **Use Case**: Manage all microservices and their documentation
+- **Integration**: New developer portal
+```bash
+npx @backstage/create-app@latest
+```
+
+### 🔐 **Identity & Security**
+
+#### 17. **Clerk** - Modern Authentication
+- **Purpose**: Enhanced authentication with video support
+- **Benefits**: Multi-factor auth, organization management, webhooks
+- **Use Case**: Upgrade deafauth with modern features
+- **Integration**: Replace/enhance deafauth
+```bash
+npm install @clerk/clerk-react
+```
+
+#### 18. **Ceramic Network** - Decentralized Identity
+- **Purpose**: Self-sovereign identity for deaf users
+- **Benefits**: Verifiable credentials, privacy-preserving, portable
+- **Use Case**: Deaf community credentials and reputation
+- **Integration**: New microservice `services/ceramic-identity`
+```bash
+npm install @ceramicnetwork/http-client
+```
+
+### 📹 **Video Processing**
+
+#### 19. **Cloudflare Stream** - Video Infrastructure
+- **Purpose**: Video encoding and delivery
+- **Benefits**: Cheaper than Mux, built-in captions, global CDN
+- **Use Case**: Replace/complement Mux for video processing
+- **Integration**: Add to vcode service
+
+#### 20. **FFmpeg.wasm** - Browser Video Processing
+- **Purpose**: Client-side video processing
+- **Benefits**: Privacy-friendly, no upload needed, instant processing
+- **Use Case**: Browser-based video editing for deaf users
+- **Integration**: Add to extension and web app
+```bash
+npm install @ffmpeg/ffmpeg
+```
+
+### 💡 **Getting Started with Integrations**
+
+1. **Start Small**: Begin with LiveKit, Qdrant, and MediaPipe
+2. **Measure Impact**: Monitor user engagement and accessibility improvements
+3. **Iterate**: Add more services based on user feedback
+4. **Document**: Update this README as new services are integrated
+
+### 🛠️ **Integration Scaffolding**
+
+Use these generators to quickly scaffold new microservices:
+
+```bash
+# Create new Deno service
+deno run --allow-read --allow-write https://deno.land/x/scaffolder/mod.ts
+
+# Create new Node.js microservice
+npx express-generator services/new-service
+
+# Create API gateway service
+npx create-kong-plugin my-plugin
+
+# Create monitoring stack
+git clone https://github.com/vegasbrianc/prometheus.git
+```
+
 ## 📄 License
 
 [License information to be added]
@@ -259,3 +750,7 @@ The event listener architecture processes:
 ## 🙏 Acknowledgments
 
 Built for and with the deaf community to enhance digital accessibility and independence.
+
+---
+
+**Note**: This platform actively integrates modern tools to provide the best deaf-first accessibility experience. Check individual branch READMEs for branch-specific integrations and features.
