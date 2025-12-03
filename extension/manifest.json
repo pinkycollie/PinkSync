@@ -20,7 +20,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["scripts/content.js"],
+      "js": ["scripts/config.js", "scripts/content.js"],
       "css": ["styles/content.css"],
       "run_at": "document_idle"
     }

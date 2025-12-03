@@ -247,7 +247,10 @@ function applyZoomEnhancements() {
   
   // Try to enable live captions
   setTimeout(() => {
-    const captionButton = document.querySelector('[aria-label*="caption" i]');
+    // Find caption button - try multiple possible selectors
+    const captionButton = document.querySelector('[aria-label*="Caption"]') ||
+                         document.querySelector('[aria-label*="caption"]') ||
+                         document.querySelector('[aria-label*="CAPTION"]');
     if (captionButton && captionButton.getAttribute('aria-pressed') !== 'true') {
       captionButton.click();
       console.log('PinkSync: Enabled Zoom captions');
@@ -267,7 +270,10 @@ function applyTeamsEnhancements() {
     if (moreButton) {
       moreButton.click();
       setTimeout(() => {
-        const captionButton = document.querySelector('[data-tid*="caption" i]');
+        // Try multiple possible selectors for caption button
+        const captionButton = document.querySelector('[data-tid*="Caption"]') ||
+                             document.querySelector('[data-tid*="caption"]') ||
+                             document.querySelector('[data-tid*="CAPTION"]');
         if (captionButton) {
           captionButton.click();
           console.log('PinkSync: Enabled Teams captions');

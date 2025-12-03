@@ -4,11 +4,12 @@
  * Syncs with DeafAUTH API and manages user preferences across all tabs
  */
 
-// Configuration
-// For production, update this to your production API URL
-// For development, use http://localhost:3000
-const DEAFAUTH_API_URL = 'http://localhost:3000'; // Change to production URL before publishing
-const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes
+// Import configuration
+importScripts('config.js');
+
+// Configuration - uses auto-detected environment
+const DEAFAUTH_API_URL = self.PINKSYNC_CONFIG.apiUrl;
+const SYNC_INTERVAL = self.PINKSYNC_CONFIG.syncInterval;
 
 // State management
 let userPreferences = null;
