@@ -307,10 +307,15 @@ function applyHotelBookingEnhancements() {
   
   // Auto-check accessibility options
   setTimeout(() => {
+    // Find accessibility-related checkboxes (case-insensitive via multiple selectors)
     const accessibilityCheckboxes = document.querySelectorAll(
-      'input[type="checkbox"][name*="accessible" i], ' +
-      'input[type="checkbox"][name*="disability" i], ' +
-      'input[type="checkbox"][value*="accessible" i]'
+      'input[type="checkbox"][name*="accessible"], ' +
+      'input[type="checkbox"][name*="Accessible"], ' +
+      'input[type="checkbox"][name*="ACCESSIBLE"], ' +
+      'input[type="checkbox"][name*="disability"], ' +
+      'input[type="checkbox"][name*="Disability"], ' +
+      'input[type="checkbox"][value*="accessible"], ' +
+      'input[type="checkbox"][value*="Accessible"]'
     );
     
     accessibilityCheckboxes.forEach(checkbox => {
