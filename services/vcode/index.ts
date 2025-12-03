@@ -5,7 +5,7 @@
  * Provides cryptographic proof, timestamps, and authenticity verification.
  */
 
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 export interface VCodeSession {
   id: string;

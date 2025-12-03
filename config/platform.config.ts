@@ -69,15 +69,15 @@ const defaultConfig: PlatformConfig = {
     interpreters: true,
   },
   services: {
-    apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
-    ragDatabaseUrl: process.env.RAG_DATABASE_URL,
-    vectorDbUrl: process.env.VECTOR_DB_URL,
-    workerQueueUrl: process.env.WORKER_QUEUE_URL,
-    signalServiceUrl: process.env.SIGNAL_SERVICE_URL,
+    apiBaseUrl: Deno.env.get("API_URL") || '/api',
+    ragDatabaseUrl: Deno.env.get("RAG_DATABASE_URL"),
+    vectorDbUrl: Deno.env.get("VECTOR_DB_URL"),
+    workerQueueUrl: Deno.env.get("WORKER_QUEUE_URL"),
+    signalServiceUrl: Deno.env.get("SIGNAL_SERVICE_URL"),
   },
   mbtqIntegration: {
     enabled: true,
-    apiUrl: process.env.MBTQ_API_URL,
+    apiUrl: Deno.env.get("MBTQ_API_URL"),
     sharedAuth: true,
   },
   accessibility: {
@@ -97,7 +97,7 @@ const defaultConfig: PlatformConfig = {
  * Get configuration for specific environment
  */
 export function getPlatformConfig(environment?: PlatformEnvironment): PlatformConfig {
-  const env = environment || (process.env.NEXT_PUBLIC_PLATFORM_ENV as PlatformEnvironment) || 'standalone';
+  const env = environment || (Deno.env.get("PLATFORM_ENV") as PlatformEnvironment) || 'standalone';
   
   // Environment-specific overrides
   const envConfigs: Partial<Record<PlatformEnvironment, Partial<PlatformConfig>>> = {

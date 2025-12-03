@@ -5,8 +5,8 @@
  * No audio CAPTCHAs, voice verification, or audio-based 2FA.
  */
 
-import { DeafUser, AccessibilityPreferences } from '@/types';
-import { events } from '@/services/event-orchestrator';
+import { DeafUser, AccessibilityPreferences } from '@/types/index.ts';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 export interface AuthCredentials {
   username: string;

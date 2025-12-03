@@ -5,8 +5,8 @@
  * Acts as a broker to match deaf users with relevant services, products, and programs.
  */
 
-import { ServiceProvider, ProviderType, ProviderCapability } from '@/types';
-import { events } from '@/services/event-orchestrator';
+import { ServiceProvider, ProviderType, ProviderCapability } from '@/types/index.ts';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 class ApiBroker {
   private providers: Map<string, ServiceProvider> = new Map();

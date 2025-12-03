@@ -6,7 +6,7 @@
  */
 
 import { ResearchDocument, VectorSearchQuery, VectorSearchResult, ResearchType } from '@/types';
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 class RagEngine {
   private documents: Map<string, ResearchDocument> = new Map();
