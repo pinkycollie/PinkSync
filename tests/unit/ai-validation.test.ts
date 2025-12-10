@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import { AI_CONSTANTS } from '../helpers/test-constants';
 
 describe('AI Service Validation', () => {
   describe('Speed Benchmarks', () => {
@@ -13,19 +14,19 @@ describe('AI Service Validation', () => {
       // Simulate AI processing
       const mockAIResponse = await new Promise((resolve) => {
         setTimeout(() => {
-          resolve({ result: 'processed', confidence: 0.95 });
+          resolve({ result: 'processed', confidence: AI_CONSTANTS.EXPECTED_CONFIDENCE });
         }, 50);
       });
       
       const duration = Date.now() - startTime;
       
       expect(mockAIResponse).toBeTruthy();
-      expect(duration).toBeLessThan(200); // Should respond within 200ms
+      expect(duration).toBeLessThan(AI_CONSTANTS.SIMPLE_REQUEST_TIMEOUT_MS);
     });
 
     it('should handle batch processing efficiently', async () => {
       const startTime = Date.now();
-      const batchSize = 10;
+      const batchSize = AI_CONSTANTS.DEFAULT_BATCH_SIZE;
       
       // Simulate batch AI processing
       const promises = Array.from({ length: batchSize }, (_, i) =>
@@ -40,11 +41,11 @@ describe('AI Service Validation', () => {
       const duration = Date.now() - startTime;
       
       expect(results.length).toBe(batchSize);
-      expect(duration).toBeLessThan(500); // Batch should complete within 500ms
+      expect(duration).toBeLessThan(AI_CONSTANTS.BATCH_PROCESSING_TIMEOUT_MS);
     });
 
     it('should maintain performance under load', async () => {
-      const iterations = 50;
+      const iterations = AI_CONSTANTS.PERFORMANCE_TEST_ITERATIONS;
       const durations: number[] = [];
       
       for (let i = 0; i < iterations; i++) {
@@ -61,7 +62,7 @@ describe('AI Service Validation', () => {
       const maxDuration = Math.max(...durations);
       
       expect(avgDuration).toBeLessThan(50);
-      expect(maxDuration).toBeLessThan(100);
+      expect(maxDuration).toBeLessThan(AI_CONSTANTS.AVERAGE_LATENCY_MS);
     });
   });
 
@@ -70,7 +71,7 @@ describe('AI Service Validation', () => {
       const mockAIService = {
         process: async (input: string) => ({
           result: input.toUpperCase(),
-          confidence: 0.95,
+          confidence: AI_CONSTANTS.EXPECTED_CONFIDENCE,
           processingTime: 45,
           metadata: {
             model: 'test-model',

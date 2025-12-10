@@ -17,6 +17,7 @@ export default defineConfig({
         '**/dist/**',
         '**/.next/**',
         'coverage/**',
+        'services/asl-glosser-old/**',  // Old version, exclude from coverage
       ],
       include: [
         'services/**/*.ts',
@@ -41,6 +42,7 @@ export default defineConfig({
       'dist',
       '.next',
       'coverage',
+      'tests/e2e/**',  // E2E tests are run by Playwright, not Vitest
     ],
     testTimeout: 10000,
     hookTimeout: 10000,
