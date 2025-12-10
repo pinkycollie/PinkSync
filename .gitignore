@@ -48,3 +48,12 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+.nyc_output/
+
+# Documentation generated
+docs/api/
