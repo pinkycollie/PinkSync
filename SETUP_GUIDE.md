@@ -23,6 +23,30 @@ This will:
 - Start all services using `docker-compose.master.yml`
 - Display access URLs
 
+### 3. Run Health Checks (Recommended)
+
+```bash
+./scripts/health-check.sh
+```
+
+This will:
+- Verify all containers are running
+- Test service endpoints
+- Check accessibility features
+- Validate port allocations
+
+### 4. Test Accessibility Features
+
+```bash
+./scripts/test-accessibility.sh
+```
+
+This will:
+- Test WCAG AAA compliance
+- Verify deaf accessibility features
+- Check AI tools integration
+- Validate platform connectivity
+
 ## What's New
 
 ### Port Conflict Resolution
@@ -138,6 +162,81 @@ For production:
 5. **Replace `latest` image tags with specific version tags** in docker-compose.master.yml for reproducible deployments
 6. Use proper secrets management for sensitive data
 7. Configure appropriate backup and monitoring solutions
+
+### mbtq.dev Infrastructure Setup
+
+For deploying to mbtq.dev domain:
+
+1. **DNS Configuration**
+   - Set up A/AAAA records for mbtq.dev
+   - Configure wildcard DNS for *.mbtq.dev
+
+2. **SSL Certificates**
+   ```bash
+   # Use Let's Encrypt for production certificates
+   certbot certonly --nginx -d mbtq.dev -d *.mbtq.dev
+   ```
+
+3. **Update nginx Configuration**
+   - The nginx-master.conf already includes `*.mbtq.dev` in server_name
+   - Point SSL certificates to Let's Encrypt paths
+
+4. **Enable HTTPS Redirect**
+   - Uncomment line 46-47 in nginx-master.conf
+   - Reload nginx: `docker exec master-nginx nginx -s reload`
+
+## Automated Testing & Monitoring
+
+### Continuous Health Checks
+
+The platform includes automated health checking:
+
+```bash
+# Manual health check
+./scripts/health-check.sh
+
+# Automated via GitHub Actions
+# Runs on every push and daily at 6 AM UTC
+```
+
+### Accessibility Testing
+
+Run comprehensive accessibility tests:
+
+```bash
+./scripts/test-accessibility.sh
+```
+
+Tests include:
+- WCAG AAA compliance validation
+- Deaf accessibility features (visual alerts, sign language, captions)
+- AI tools integration
+- Platform service connectivity
+
+### Configuration Auto-Update
+
+Keep configurations synchronized:
+
+```bash
+./scripts/update-config.sh
+```
+
+This validates:
+- mbtq.dev infrastructure setup
+- Service configurations
+- SSL certificates
+- Generates CONFIG_STATUS.md documentation
+
+### CI/CD Integration
+
+The platform includes GitHub Actions workflows:
+
+- **platform-health-check.yml** - Automated health checks on push/PR
+- Validates all configurations
+- Tests accessibility compliance
+- Generates detailed reports
+
+View workflow status in GitHub Actions tab.
 
 ## Support
 
