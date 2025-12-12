@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit on any error
 echo "🔐 Generating Self-Signed SSL Certificates for Development"
 echo "==========================================================="
 

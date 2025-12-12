@@ -133,9 +133,11 @@ For production:
 
 1. Replace self-signed certificates with real SSL certificates
 2. Update `server_name` in nginx-master.conf to your domain
-3. Uncomment the HTTPS redirect in the HTTP server block
+3. Uncomment the HTTPS redirect in the HTTP server block (line 46-47)
 4. Set `NODE_ENV=production` and other production environment variables
-5. Use proper secrets management for sensitive data
+5. **Replace `latest` image tags with specific version tags** in docker-compose.master.yml for reproducible deployments
+6. Use proper secrets management for sensitive data
+7. Configure appropriate backup and monitoring solutions
 
 ## Support
 
