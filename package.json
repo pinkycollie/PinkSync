@@ -5,9 +5,12 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:staging": "NODE_ENV=staging next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "deploy:staging": "npm run build:staging && gh-pages -d out -b gh-pages",
+    "preview:local": "npx serve out -p 3001"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
