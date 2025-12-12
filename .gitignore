@@ -48,3 +48,8 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
