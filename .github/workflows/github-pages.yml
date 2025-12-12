@@ -38,11 +38,8 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Build for staging
-        run: |
-          # Build with staging config
-          npm run build
+        run: npm run build:staging
         env:
-          NODE_ENV: staging
           NEXT_PUBLIC_PLATFORM_ENV: staging
           NEXT_PUBLIC_API_URL: https://api.mbtq.dev
           NEXT_PUBLIC_AUTH_URL: https://auth.mbtq.dev
