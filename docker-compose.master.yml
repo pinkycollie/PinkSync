@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Master nginx - single entry point
+  nginx:
+    image: nginx:alpine
+    container_name: master-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-master.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - pinksync
+      - deafauth
+      - pinkflow
+      - pinkflowai
+      - pinkyai
+      - business-magician
+    networks:
+      - mbtq-network
+
+  # PinkSync (Next.js) - Port 3000 internal
+  pinksync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pinksync-nextjs
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    expose:
+      - "3000"
+    networks:
+      - mbtq-network
+
+  # DeafAuth (Deno) - Port 8001 internal (CHANGED FROM 8000)
+  deafauth:
+    image: deafauth:latest
+    container_name: deafauth-deno
+    environment:
+      - PORT=8001
+    expose:
+      - "8001"
+    networks:
+      - mbtq-network
+
+  # PinkFlow (FastAPI) - Port 8002 internal (CHANGED FROM 8000)
+  pinkflow:
+    image: pinkflow:latest
+    container_name: pinkflow-fastapi
+    environment:
+      - PORT=8002
+    expose:
+      - "8002"
+    networks:
+      - mbtq-network
+
+  # PinkFlowAI (Flask) - Port 5000 internal
+  pinkflowai:
+    image: pinkflowai:latest
+    container_name: pinkflowai-flask
+    environment:
+      - PORT=5000
+    expose:
+      - "5000"
+    networks:
+      - mbtq-network
+
+  # PinkyAI API (Uvicorn) - Port 8003 internal (CHANGED FROM 8000)
+  pinkyai:
+    image: pinkyai:latest
+    container_name: pinkyai-api
+    environment:
+      - PORT=8003
+    expose:
+      - "8003"
+    networks:
+      - mbtq-network
+
+  # Business Magician - Port 8080 internal
+  business-magician:
+    image: business-magician:latest
+    container_name: business-magician
+    environment:
+      - PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - mbtq-network
+
+networks:
+  mbtq-network:
+    driver: bridge
