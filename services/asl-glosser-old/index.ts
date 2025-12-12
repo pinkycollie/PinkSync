@@ -224,7 +224,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")")}`,
+      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     text,
@@ -272,7 +272,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")")}`,
+      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     videoUrl,
@@ -330,7 +330,7 @@ class ASLGlosserService {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")")}`,
+      //     'Authorization': `Bearer ${env.get("SIGN_SPEAK_API_KEY")}`,
       //   },
       //   body: JSON.stringify({
       //     audioUrl,
