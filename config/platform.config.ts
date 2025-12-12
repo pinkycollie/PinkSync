@@ -5,6 +5,8 @@
  * Supports: standalone, extension, embedded, api, signal, notificator
  */
 
+import { env } from '@/lib/env';
+
 export type PlatformEnvironment = 
   | 'standalone'    // Full web application
   | 'extension'     // Browser extension
@@ -69,15 +71,15 @@ const defaultConfig: PlatformConfig = {
     interpreters: true,
   },
   services: {
-    apiBaseUrl: Deno.env.get("API_URL") || '/api',
-    ragDatabaseUrl: Deno.env.get("RAG_DATABASE_URL"),
-    vectorDbUrl: Deno.env.get("VECTOR_DB_URL"),
-    workerQueueUrl: Deno.env.get("WORKER_QUEUE_URL"),
-    signalServiceUrl: Deno.env.get("SIGNAL_SERVICE_URL"),
+    apiBaseUrl: env.get("API_URL") || '/api',
+    ragDatabaseUrl: env.get("RAG_DATABASE_URL"),
+    vectorDbUrl: env.get("VECTOR_DB_URL"),
+    workerQueueUrl: env.get("WORKER_QUEUE_URL"),
+    signalServiceUrl: env.get("SIGNAL_SERVICE_URL"),
   },
   mbtqIntegration: {
     enabled: true,
-    apiUrl: Deno.env.get("MBTQ_API_URL"),
+    apiUrl: env.get("MBTQ_API_URL"),
     sharedAuth: true,
   },
   accessibility: {
@@ -97,7 +99,7 @@ const defaultConfig: PlatformConfig = {
  * Get configuration for specific environment
  */
 export function getPlatformConfig(environment?: PlatformEnvironment): PlatformConfig {
-  const env = environment || (Deno.env.get("PLATFORM_ENV") as PlatformEnvironment) || 'standalone';
+  const envVar = environment || (env.get("PLATFORM_ENV") as PlatformEnvironment) || 'standalone';
   
   // Environment-specific overrides
   const envConfigs: Partial<Record<PlatformEnvironment, Partial<PlatformConfig>>> = {
@@ -144,8 +146,8 @@ export function getPlatformConfig(environment?: PlatformEnvironment): PlatformCo
 
   return {
     ...defaultConfig,
-    environment: env,
-    ...(envConfigs[env] || {}),
+    environment: envVar,
+    ...(envConfigs[envVar] || {}),
   };
 }
 
