@@ -48,11 +48,9 @@ jobs:
       - name: Add snapshot metadata
         if: github.event.inputs.snapshot_name != ''
         run: |
-          SNAPSHOT_FILE=out/SNAPSHOT.txt
-          echo "Snapshot: ${{ github.event.inputs.snapshot_name }}" \
-            > ${SNAPSHOT_FILE}
-          echo "Build Date: $(date -u)" >> ${SNAPSHOT_FILE}
-          echo "Commit: ${{ github.sha }}" >> ${SNAPSHOT_FILE}
+          echo "Snapshot: ${{ github.event.inputs.snapshot_name }}" > out/SNAPSHOT.txt
+          echo "Build Date: $(date -u)" >> out/SNAPSHOT.txt
+          echo "Commit: ${{ github.sha }}" >> out/SNAPSHOT.txt
 
       - name: Create .nojekyll file
         run: touch out/.nojekyll
