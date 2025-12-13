@@ -9,7 +9,6 @@
 # next.js (legacy - will be removed)
 /.next/
 /out/
-next.config.mjs
 next-env.d.ts
 
 # production
@@ -48,3 +47,12 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+.nyc_output/
+
+# Documentation generated
+docs/api/

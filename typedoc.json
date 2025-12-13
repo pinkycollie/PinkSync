@@ -1,0 +1,32 @@
+{
+  "entryPoints": [
+    "services",
+    "lib"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "readme": "README.md",
+  "name": "PinkSync API Documentation",
+  "excludeExternals": true,
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/pinkycollie/PinkSync",
+    "Documentation": "https://github.com/pinkycollie/PinkSync/tree/main/docs"
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/coverage/**"
+  ],
+  "theme": "default",
+  "gitRevision": "main",
+  "sort": ["source-order"],
+  "commentStyle": "all"
+}
