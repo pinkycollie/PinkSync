@@ -44,7 +44,6 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api.mbtq.dev
           NEXT_PUBLIC_AUTH_URL: https://auth.mbtq.dev
           # Add base path for GitHub Pages
-          NEXT_PUBLIC_BASE_PATH: /PinkSync
 
       - name: Add snapshot metadata
         if: github.event.inputs.snapshot_name != ''
