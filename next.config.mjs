@@ -23,7 +23,8 @@ const nextConfig = {
   images: isStaging ? {
     unoptimized: true
   } : {
-    unoptimized: true,
+    // You can specify domains here if needed, e.g.:
+    // domains: ['yourdomain.com'],
   },
   
   // Disable Vercel analytics
