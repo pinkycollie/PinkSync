@@ -102,12 +102,22 @@ This repository contains comprehensive documentation for the PinkSync platform, 
 
 ### 7. **[/docs Directory](./docs/)**
 Additional technical documentation:
+- **[BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Deploy any branch to GitHub Pages
+- **[BRANCH_DEPLOYMENT_EXAMPLES.md](./docs/BRANCH_DEPLOYMENT_EXAMPLES.md)** - **NEW!** Real-world deployment examples
+- **[DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** Quick reference for all deployment URLs
+- **[STAGING.md](./docs/STAGING.md)** - Staging and preview environments
 - `architecture-complete.md` - Complete system architecture
 - `api-gateway.md` - API gateway documentation
 - `architecture.md` - Architecture guide
 - `api.md` - API documentation
 - `deployment.md` - Deployment guide
 - `contributing.md` - Contributing guidelines
+
+---
+
+### 8. **[/scripts Directory](./scripts/)**
+Helper scripts for development and deployment:
+- **[deploy-branch.sh](./scripts/deploy-branch.sh)** - **NEW!** Interactive branch deployment helper
 
 ---
 
@@ -119,9 +129,11 @@ Additional technical documentation:
 3. Review [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service details
 
 ### For DevOps Engineers
-1. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
-2. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
-3. [docs/deployment.md](./docs/deployment.md) - Deployment guide
+1. **[docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Branch deployment guide
+2. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
+3. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
+4. [docs/deployment.md](./docs/deployment.md) - Deployment guide
+5. **[docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** All deployment URLs
 
 ### For Frontend Developers
 1. [README.md](./README.md) - Browser extension section
@@ -170,13 +182,19 @@ PinkSync/
 ├── IMPLEMENTATION_SUMMARY.md      # Implementation details
 ├── IMPLEMENTATION_SUMMARY_FINAL.md
 ├── MIGRATION_SUMMARY.md
-└── docs/
-    ├── architecture-complete.md   # Complete architecture
-    ├── api-gateway.md             # API gateway
-    ├── architecture.md            # Architecture guide
-    ├── api.md                     # API documentation
-    ├── deployment.md              # Deployment
-    └── contributing.md            # Contributing
+├── docs/
+│   ├── BRANCH_DEPLOYMENTS.md      # NEW! Branch deployment guide
+│   ├── BRANCH_DEPLOYMENT_EXAMPLES.md # NEW! Deployment examples
+│   ├── DEPLOYMENT_URLS.md         # NEW! Deployment URLs reference
+│   ├── STAGING.md                 # Staging environments
+│   ├── architecture-complete.md   # Complete architecture
+│   ├── api-gateway.md             # API gateway
+│   ├── architecture.md            # Architecture guide
+│   ├── api.md                     # API documentation
+│   ├── deployment.md              # Deployment
+│   └── contributing.md            # Contributing
+└── scripts/
+    └── deploy-branch.sh           # NEW! Deployment helper
 ```
 
 ---
@@ -201,7 +219,10 @@ PinkSync/
 → [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) or [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
 
 **Deployment Guide?**
-→ [docs/deployment.md](./docs/deployment.md)
+→ [docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md) (Branch deployments) or [docs/deployment.md](./docs/deployment.md) (General)
+
+**Deployment URLs?**
+→ [docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)
 
 **Contributing Guidelines?**
 → [docs/contributing.md](./docs/contributing.md)
