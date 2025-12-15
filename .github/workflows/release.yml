@@ -1,0 +1,217 @@
+# Automated Release Workflow
+# Triggers when a version tag is pushed (v*)
+
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+permissions:
+  contents: write
+  packages: write
+  discussions: write
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          
+          # Check if pre-release (contains -, alpha, beta, rc)
+          if [[ $VERSION =~ [-] ]] || [[ $VERSION =~ (alpha|beta|rc) ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Extract changelog section for this version
+          CHANGELOG_CONTENT=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT="No changelog entry found for version $VERSION.
+
+Please check CHANGELOG.md for details."
+          fi
+          
+          # Save to file for release notes
+          echo "$CHANGELOG_CONTENT" > release-notes.md
+          
+          echo "Release notes extracted for v$VERSION"
+
+      - name: Create release notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          PRERELEASE="${{ steps.version.outputs.prerelease }}"
+          
+          cat > final-release-notes.md << 'EOF'
+          ## PinkSync $TAG
+          
+          **Release Date:** $(date +%Y-%m-%d)
+          **Version:** $VERSION
+          EOF
+          
+          if [ "$PRERELEASE" = "true" ]; then
+            echo "**Type:** Pre-release" >> final-release-notes.md
+          else
+            echo "**Type:** Stable Release" >> final-release-notes.md
+          fi
+          
+          echo "" >> final-release-notes.md
+          echo "### What's Changed" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          cat release-notes.md >> final-release-notes.md
+          
+          echo "" >> final-release-notes.md
+          echo "---" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "### 📦 Installation" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "\`\`\`bash" >> final-release-notes.md
+          echo "npm install pinksync@$VERSION" >> final-release-notes.md
+          echo "\`\`\`" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "### 🌐 Deployments" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "- **Main:** https://pinkycollie.github.io/PinkSync/" >> final-release-notes.md
+          echo "- **Branch Deployments:** https://pinkycollie.github.io/PinkSync/{branch-name}/" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "### 📚 Documentation" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "- [Changelog](https://github.com/pinkycollie/PinkSync/blob/main/CHANGELOG.md)" >> final-release-notes.md
+          echo "- [Release Guide](https://github.com/pinkycollie/PinkSync/blob/main/docs/RELEASE_GUIDE.md)" >> final-release-notes.md
+          echo "- [Branch Deployments](https://github.com/pinkycollie/PinkSync/blob/main/docs/BRANCH_DEPLOYMENTS.md)" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "### 🔗 Links" >> final-release-notes.md
+          echo "" >> final-release-notes.md
+          echo "- [Full Changelog](https://github.com/pinkycollie/PinkSync/compare/$(git describe --tags --abbrev=0 HEAD^)...$TAG)" >> final-release-notes.md
+          echo "- [All Releases](https://github.com/pinkycollie/PinkSync/releases)" >> final-release-notes.md
+          
+          # Replace variables
+          sed -i "s|\$TAG|$TAG|g" final-release-notes.md
+          sed -i "s|\$VERSION|$VERSION|g" final-release-notes.md
+          sed -i "s|PRERELEASE|$PRERELEASE|g" final-release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: PinkSync ${{ steps.version.outputs.tag }}
+          body_path: final-release-notes.md
+          draft: false
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          generate_release_notes: true
+          discussion_category_name: Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate summary
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          PRERELEASE="${{ steps.version.outputs.prerelease }}"
+          
+          echo "## 🚀 Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$PRERELEASE" = "true" ]; then
+            echo "- **Type:** Pre-release ⚠️" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Type:** Stable Release ✅" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "- **Created:** $(date -u +%Y-%m-%d\ %H:%M:%S) UTC" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](https://github.com/pinkycollie/PinkSync/releases/tag/$TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Changelog](https://github.com/pinkycollie/PinkSync/blob/main/CHANGELOG.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Main Deployment](https://pinkycollie.github.io/PinkSync/)" >> $GITHUB_STEP_SUMMARY
+
+  deploy-release:
+    name: Deploy Release to GitHub Pages
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build for production
+        run: npm run build:staging
+        env:
+          NEXT_PUBLIC_PLATFORM_ENV: production
+          NEXT_PUBLIC_VERSION: ${{ needs.create-release.outputs.version }}
+          NEXT_PUBLIC_API_URL: https://api.mbtq.dev
+          NEXT_PUBLIC_AUTH_URL: https://auth.mbtq.dev
+
+      - name: Add version metadata
+        run: |
+          cat > out/VERSION.txt << EOF
+          Version: ${{ needs.create-release.outputs.version }}
+          Tag: ${{ needs.create-release.outputs.tag }}
+          Release Date: $(date -u)
+          Commit: ${{ github.sha }}
+          Build: ${{ github.run_number }}
+          EOF
+
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          commit_message: 'Deploy release ${{ needs.create-release.outputs.tag }}'
+
+      - name: Deployment summary
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          echo "## 🌐 Deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Release $TAG has been deployed to GitHub Pages." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 https://pinkycollie.github.io/PinkSync/" >> $GITHUB_STEP_SUMMARY
