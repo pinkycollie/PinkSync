@@ -1,11 +1,20 @@
 # Staging & Preview Environments
 
+> **🆕 NEW:** Each branch can now be deployed to its own GitHub Pages URL!  
+> See [Branch Deployments Guide](./BRANCH_DEPLOYMENTS.md) for details.
+
 ## GitHub Pages Staging
 
 ### Main Staging URL
 https://pinkycollie.github.io/PinkSync/
 
 Automatically deploys on every push to `main` or `staging` branch.
+
+### Branch-Specific Deployments
+Each microservice, API, or feature branch gets its own URL:
+- **URL Pattern:** `https://pinkycollie.github.io/PinkSync/{branch-name}/`
+- **Example:** `service-deafauth` → https://pinkycollie.github.io/PinkSync/service-deafauth/
+- **Documentation:** See [BRANCH_DEPLOYMENTS.md](./BRANCH_DEPLOYMENTS.md)
 
 ### PR Previews
 Each pull request gets its own preview:

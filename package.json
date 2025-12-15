@@ -10,6 +10,7 @@
     "lint": "next lint",
     "start": "next start",
     "deploy:staging": "npm run build:staging && gh-pages -d out -b gh-pages",
+    "deploy:branch": "bash scripts/deploy-branch.sh",
     "preview:local": "npx serve out -p 3001",
     "test": "vitest run",
     "test:watch": "vitest",

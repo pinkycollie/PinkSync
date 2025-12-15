@@ -387,6 +387,38 @@ docker run -p 8000:8000 pinksync-<service-name>
 docker-compose up <service-name>
 ```
 
+### 🌐 Branch-Specific GitHub Pages Deployments
+
+**NEW!** Every branch can now be automatically deployed to its own GitHub Pages URL for independent testing and preview:
+
+```bash
+# Each branch gets its own URL
+service-deafauth    → https://pinkycollie.github.io/PinkSync/service-deafauth/
+api-interpreters    → https://pinkycollie.github.io/PinkSync/api-interpreters/
+feat-new-feature    → https://pinkycollie.github.io/PinkSync/feat-new-feature/
+```
+
+**Supported Branch Patterns:**
+- `service-*` - Service microservices
+- `api-*` - API endpoints
+- `tool-*` - Tools and utilities
+- `feat-*` / `feature-*` - New features
+- `video-*`, `data-*` - Processing services
+- Special branches: `vcode`, `videoized`, `REGISTRATION`
+
+**How It Works:**
+1. Create a branch with a supported pattern: `git checkout -b service-my-service`
+2. Push your changes: `git push origin service-my-service`
+3. Automatic deployment triggers via GitHub Actions
+4. Access your deployment: `https://pinkycollie.github.io/PinkSync/service-my-service/`
+
+**Documentation:**
+- 📖 [Branch Deployments Guide](./docs/BRANCH_DEPLOYMENTS.md) - Complete guide
+- 🔗 [Deployment URLs Reference](./docs/DEPLOYMENT_URLS.md) - All deployment URLs
+- 📋 [Staging Guide](./docs/STAGING.md) - Staging environments
+
+This enables true microservice independence - each branch/service can be developed, tested, and previewed in isolation without affecting other services!
+
 ## 🌐 Integration with mbtq.dev
 
 PinkSync is designed to work seamlessly with the mbtq.dev ecosystem, providing:
@@ -421,6 +453,9 @@ PinkSync maintains a RAG (Retrieval-Augmented Generation) system that:
 ## 📖 Documentation
 
 - [Complete Architecture](./docs/architecture-complete.md) - **NEW!** Full system architecture
+- [Branch Deployments Guide](./docs/BRANCH_DEPLOYMENTS.md) - **NEW!** Deploy any branch to GitHub Pages
+- [Deployment URLs Reference](./docs/DEPLOYMENT_URLS.md) - **NEW!** Quick reference for all deployment URLs
+- [Staging Guide](./docs/STAGING.md) - Preview environments
 - [API Gateway](./docs/api-gateway.md) - **NEW!** Extension API documentation
 - [Browser Extension](./extension/README.md) - **NEW!** Extension setup and usage
 - [Architecture Guide](./docs/architecture.md)
