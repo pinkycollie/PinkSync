@@ -1,0 +1,205 @@
+# Deploy any branch to GitHub Pages
+# Each branch gets its own URL: https://pinkycollie.github.io/PinkSync/{branch-name}/
+
+name: Branch GitHub Pages Deployment
+
+on:
+  push:
+    branches:
+      - 'service-*'      # Service branches (microservices)
+      - 'api-*'          # API branches
+      - 'tool-*'         # Tool branches
+      - 'feat-*'         # Feature branches
+      - 'feature-*'      # Feature branches
+      - 'video-*'        # Video processing branches
+      - 'data-*'         # Data processing branches
+      - 'vcode'          # VCode platform
+      - 'integrated-*'   # Integration branches
+      - 'QR-Code-*'      # QR code system
+      - 'REGISTRATION'   # Registration system
+      - 'admin-*'        # Admin branches
+      - 'videoized'      # Analytics platform
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name to deploy (leave empty to use current branch)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: branch-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  deploy-branch:
+    name: Deploy Branch to GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine branch name
+        id: branch
+        run: |
+          if [ "${{ github.event.inputs.branch_name }}" != "" ]; then
+            BRANCH_NAME="${{ github.event.inputs.branch_name }}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Deploying branch: $BRANCH_NAME"
+          
+          # Sanitize branch name for URL (replace / with -)
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/\//-/g')
+          echo "sanitized=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
+          echo "Sanitized name: $SANITIZED_BRANCH"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Create branch-specific next.config
+        run: |
+          BRANCH="${{ steps.branch.outputs.sanitized }}"
+          BRANCH_NAME="${{ steps.branch.outputs.name }}"
+          
+          cat > next.config.branch.mjs << 'EOF'
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            eslint: {
+              ignoreDuringBuilds: true,
+            },
+            typescript: {
+              ignoreBuildErrors: true,
+            },
+            
+            // GitHub Pages uses static export
+            output: 'export',
+            
+            // Branch-specific base path
+            basePath: '/PinkSync/$BRANCH_PATH',
+            
+            // Asset prefix for GitHub Pages
+            assetPrefix: '/PinkSync/$BRANCH_PATH/',
+            
+            // Disable image optimization for static export
+            images: {
+              unoptimized: true
+            },
+            
+            // Environment-specific settings
+            env: {
+              PLATFORM_ENV: 'staging',
+              BRANCH_NAME: '$BRANCH_NAME',
+              API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.mbtq.dev',
+              AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.mbtq.dev',
+            }
+          }
+          
+          export default nextConfig
+          EOF
+          
+          # Replace placeholders with error checking
+          sed -i "s|\$BRANCH_PATH|$BRANCH|g" next.config.branch.mjs
+          if ! grep -F "$BRANCH" next.config.branch.mjs > /dev/null; then
+            echo "Error: Failed to replace BRANCH_PATH placeholder"
+            exit 1
+          fi
+          
+          sed -i "s|\$BRANCH_NAME|$BRANCH_NAME|g" next.config.branch.mjs
+          if ! grep -F "$BRANCH_NAME" next.config.branch.mjs > /dev/null; then
+            echo "Error: Failed to replace BRANCH_NAME placeholder"
+            exit 1
+          fi
+          
+          # Backup original config and use branch-specific one
+          mv next.config.mjs next.config.original.mjs
+          mv next.config.branch.mjs next.config.mjs
+          
+          echo "Generated branch-specific config for: $BRANCH"
+          cat next.config.mjs
+
+      - name: Build for branch deployment
+        run: NODE_ENV=staging npm run build
+        env:
+          NEXT_PUBLIC_PLATFORM_ENV: staging
+          NEXT_PUBLIC_BRANCH_NAME: ${{ steps.branch.outputs.name }}
+          NEXT_PUBLIC_API_URL: https://api.mbtq.dev
+          NEXT_PUBLIC_AUTH_URL: https://auth.mbtq.dev
+
+      - name: Add branch metadata
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+          SANITIZED="${{ steps.branch.outputs.sanitized }}"
+          
+          cat > out/BRANCH_INFO.txt << EOF
+          Branch: $BRANCH
+          Sanitized: $SANITIZED
+          Build Date: $(date -u)
+          Commit: ${{ github.sha }}
+          Commit Short: ${GITHUB_SHA:0:7}
+          Actor: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+          Run Number: ${{ github.run_number }}
+          EOF
+          
+          echo "Branch info created:"
+          cat out/BRANCH_INFO.txt
+
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          destination_dir: ${{ steps.branch.outputs.sanitized }}
+          commit_message: 'Deploy branch ${{ steps.branch.outputs.name }}: ${{ github.sha }}'
+          keep_files: true
+
+      - name: Generate deployment summary
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+          SANITIZED="${{ steps.branch.outputs.sanitized }}"
+          BRANCH_URL="https://pinkycollie.github.io/PinkSync/$SANITIZED/"
+          
+          echo "## 🚀 Branch Deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Branch Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch Name:** \`$BRANCH\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sanitized Name:** \`$SANITIZED\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 Deployment URL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Your branch is now live at:**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [$BRANCH_URL]($BRANCH_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Visit the deployment URL to test your branch" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check BRANCH_INFO.txt at the URL for deployment details" >> $GITHUB_STEP_SUMMARY
+          echo "3. Share the URL with team members for review" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔄 Redeployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Push to \`$BRANCH\` branch to trigger automatic redeployment" >> $GITHUB_STEP_SUMMARY

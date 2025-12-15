@@ -102,12 +102,38 @@ This repository contains comprehensive documentation for the PinkSync platform, 
 
 ### 7. **[/docs Directory](./docs/)**
 Additional technical documentation:
+- **[BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Deploy any branch to GitHub Pages
+- **[BRANCH_DEPLOYMENT_EXAMPLES.md](./docs/BRANCH_DEPLOYMENT_EXAMPLES.md)** - **NEW!** Real-world deployment examples
+- **[DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** Quick reference for all deployment URLs
+- **[RELEASE_GUIDE.md](./docs/RELEASE_GUIDE.md)** - **NEW!** Version control and release management
+- **[STAGING.md](./docs/STAGING.md)** - Staging and preview environments
 - `architecture-complete.md` - Complete system architecture
 - `api-gateway.md` - API gateway documentation
 - `architecture.md` - Architecture guide
 - `api.md` - API documentation
 - `deployment.md` - Deployment guide
 - `contributing.md` - Contributing guidelines
+
+---
+
+### 8. **[CHANGELOG.md](./CHANGELOG.md)** 📝
+**Version history and release notes**
+
+**Contents**:
+- Complete version history following Keep a Changelog format
+- Semantic versioning (MAJOR.MINOR.PATCH)
+- Categorized changes (Added, Changed, Fixed, Security, etc.)
+- Release dates and links
+- Pre-release versions
+
+**Best For**: Tracking changes, understanding version history, release notes
+
+---
+
+### 9. **[/scripts Directory](./scripts/)**
+Helper scripts for development and deployment:
+- **[deploy-branch.sh](./scripts/deploy-branch.sh)** - **NEW!** Interactive branch deployment helper
+- **[create-release.sh](./scripts/create-release.sh)** - **NEW!** Interactive release creation script
 
 ---
 
@@ -119,9 +145,13 @@ Additional technical documentation:
 3. Review [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service details
 
 ### For DevOps Engineers
-1. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
-2. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
-3. [docs/deployment.md](./docs/deployment.md) - Deployment guide
+1. **[docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Branch deployment guide
+2. **[docs/RELEASE_GUIDE.md](./docs/RELEASE_GUIDE.md)** - **NEW!** Release management
+3. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
+4. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
+5. [docs/deployment.md](./docs/deployment.md) - Deployment guide
+6. **[docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** All deployment URLs
+7. **[CHANGELOG.md](./CHANGELOG.md)** - **NEW!** Version history
 
 ### For Frontend Developers
 1. [README.md](./README.md) - Browser extension section
@@ -162,6 +192,7 @@ Additional technical documentation:
 ```
 PinkSync/
 ├── README.md                      # Main documentation
+├── CHANGELOG.md                   # NEW! Version history
 ├── MICROSERVICES_CATALOG.md       # Service catalog
 ├── MODERN_INTEGRATIONS.md         # Integration guide
 ├── QUICK_REFERENCE.md             # Quick reference
@@ -170,13 +201,21 @@ PinkSync/
 ├── IMPLEMENTATION_SUMMARY.md      # Implementation details
 ├── IMPLEMENTATION_SUMMARY_FINAL.md
 ├── MIGRATION_SUMMARY.md
-└── docs/
-    ├── architecture-complete.md   # Complete architecture
-    ├── api-gateway.md             # API gateway
-    ├── architecture.md            # Architecture guide
-    ├── api.md                     # API documentation
-    ├── deployment.md              # Deployment
-    └── contributing.md            # Contributing
+├── docs/
+│   ├── BRANCH_DEPLOYMENTS.md      # NEW! Branch deployment guide
+│   ├── BRANCH_DEPLOYMENT_EXAMPLES.md # NEW! Deployment examples
+│   ├── DEPLOYMENT_URLS.md         # NEW! Deployment URLs reference
+│   ├── RELEASE_GUIDE.md           # NEW! Release management guide
+│   ├── STAGING.md                 # Staging environments
+│   ├── architecture-complete.md   # Complete architecture
+│   ├── api-gateway.md             # API gateway
+│   ├── architecture.md            # Architecture guide
+│   ├── api.md                     # API documentation
+│   ├── deployment.md              # Deployment
+│   └── contributing.md            # Contributing
+└── scripts/
+    ├── deploy-branch.sh           # NEW! Deployment helper
+    └── create-release.sh          # NEW! Release creator
 ```
 
 ---
@@ -201,7 +240,13 @@ PinkSync/
 → [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) or [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
 
 **Deployment Guide?**
-→ [docs/deployment.md](./docs/deployment.md)
+→ [docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md) (Branch deployments) or [docs/deployment.md](./docs/deployment.md) (General)
+
+**Deployment URLs?**
+→ [docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)
+
+**Release & Version History?**
+→ [CHANGELOG.md](./CHANGELOG.md) or [docs/RELEASE_GUIDE.md](./docs/RELEASE_GUIDE.md)
 
 **Contributing Guidelines?**
 → [docs/contributing.md](./docs/contributing.md)

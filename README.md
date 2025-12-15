@@ -387,6 +387,77 @@ docker run -p 8000:8000 pinksync-<service-name>
 docker-compose up <service-name>
 ```
 
+### 🌐 Branch-Specific GitHub Pages Deployments
+
+**NEW!** Every branch can now be automatically deployed to its own GitHub Pages URL for independent testing and preview:
+
+```bash
+# Each branch gets its own URL
+service-deafauth    → https://pinkycollie.github.io/PinkSync/service-deafauth/
+api-interpreters    → https://pinkycollie.github.io/PinkSync/api-interpreters/
+feat-new-feature    → https://pinkycollie.github.io/PinkSync/feat-new-feature/
+```
+
+**Supported Branch Patterns:**
+- `service-*` - Service microservices
+- `api-*` - API endpoints
+- `tool-*` - Tools and utilities
+- `feat-*` / `feature-*` - New features
+- `video-*`, `data-*` - Processing services
+- Special branches: `vcode`, `videoized`, `REGISTRATION`
+
+**How It Works:**
+1. Create a branch with a supported pattern: `git checkout -b service-my-service`
+2. Push your changes: `git push origin service-my-service`
+3. Automatic deployment triggers via GitHub Actions
+4. Access your deployment: `https://pinkycollie.github.io/PinkSync/service-my-service/`
+
+**Documentation:**
+- 📖 [Branch Deployments Guide](./docs/BRANCH_DEPLOYMENTS.md) - Complete guide
+- 🔗 [Deployment URLs Reference](./docs/DEPLOYMENT_URLS.md) - All deployment URLs
+- 📋 [Staging Guide](./docs/STAGING.md) - Staging environments
+
+This enables true microservice independence - each branch/service can be developed, tested, and previewed in isolation without affecting other services!
+
+## 📦 Versioning & Releases
+
+PinkSync follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH):
+
+```bash
+# Check current version
+npm run version:current
+
+# Create a new release (interactive)
+npm run release:create
+
+# Quick version bumps
+npm run release:patch   # Bug fixes (1.0.0 → 1.0.1)
+npm run release:minor   # New features (1.0.0 → 1.1.0)
+npm run release:major   # Breaking changes (1.0.0 → 2.0.0)
+
+# View changelog
+npm run changelog:view
+```
+
+**Version History:**
+- Current Version: `1.0.0`
+- See [CHANGELOG.md](./CHANGELOG.md) for full version history
+- See [Release Guide](./docs/RELEASE_GUIDE.md) for release procedures
+
+**Release Management:**
+- Automated releases via GitHub Actions on tag push
+- Each release includes:
+  - Changelog extraction
+  - GitHub release with notes
+  - Automatic deployment to GitHub Pages
+  - Version metadata in deployments
+
+**Branch Versioning:**
+Each branch deployment includes version metadata:
+- Main: Production version (e.g., `1.0.0`)
+- Service branches: Independent versions (e.g., `deafauth@2.1.0`)
+- Feature branches: Pre-release versions (e.g., `1.1.0-feat-xyz`)
+
 ## 🌐 Integration with mbtq.dev
 
 PinkSync is designed to work seamlessly with the mbtq.dev ecosystem, providing:
@@ -421,6 +492,11 @@ PinkSync maintains a RAG (Retrieval-Augmented Generation) system that:
 ## 📖 Documentation
 
 - [Complete Architecture](./docs/architecture-complete.md) - **NEW!** Full system architecture
+- [Branch Deployments Guide](./docs/BRANCH_DEPLOYMENTS.md) - **NEW!** Deploy any branch to GitHub Pages
+- [Deployment URLs Reference](./docs/DEPLOYMENT_URLS.md) - **NEW!** Quick reference for all deployment URLs
+- [Release Guide](./docs/RELEASE_GUIDE.md) - **NEW!** Version control and release management
+- [Changelog](./CHANGELOG.md) - **NEW!** Version history and changes
+- [Staging Guide](./docs/STAGING.md) - Preview environments
 - [API Gateway](./docs/api-gateway.md) - **NEW!** Extension API documentation
 - [Browser Extension](./extension/README.md) - **NEW!** Extension setup and usage
 - [Architecture Guide](./docs/architecture.md)
