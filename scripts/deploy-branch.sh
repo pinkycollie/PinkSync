@@ -33,7 +33,7 @@ print_error() {
 echo -e "${BLUE}"
 echo "╔════════════════════════════════════════╗"
 echo "║   PinkSync Branch Deployment Helper   ║"
-echo "╔════════════════════════════════════════╗"
+echo "╚════════════════════════════════════════╝"
 echo -e "${NC}"
 
 # Get current branch

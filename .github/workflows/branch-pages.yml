@@ -76,6 +76,8 @@ jobs:
       - name: Create branch-specific next.config
         run: |
           BRANCH="${{ steps.branch.outputs.sanitized }}"
+          BRANCH_NAME="${{ steps.branch.outputs.name }}"
+          
           cat > next.config.branch.mjs << 'EOF'
           /** @type {import('next').NextConfig} */
           const nextConfig = {
@@ -112,9 +114,18 @@ jobs:
           export default nextConfig
           EOF
           
-          # Replace placeholders
+          # Replace placeholders with error checking
           sed -i "s|\$BRANCH_PATH|$BRANCH|g" next.config.branch.mjs
-          sed -i "s|\$BRANCH_NAME|${{ steps.branch.outputs.name }}|g" next.config.branch.mjs
+          if ! grep -q "$BRANCH" next.config.branch.mjs; then
+            echo "Error: Failed to replace BRANCH_PATH placeholder"
+            exit 1
+          fi
+          
+          sed -i "s|\$BRANCH_NAME|$BRANCH_NAME|g" next.config.branch.mjs
+          if ! grep -q "$BRANCH_NAME" next.config.branch.mjs; then
+            echo "Error: Failed to replace BRANCH_NAME placeholder"
+            exit 1
+          fi
           
           # Backup original config and use branch-specific one
           mv next.config.mjs next.config.original.mjs
