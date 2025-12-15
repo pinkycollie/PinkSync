@@ -21,9 +21,9 @@ print_header() { echo -e "${PURPLE}$1${NC}"; }
 
 # Banner
 echo -e "${PURPLE}"
-echo "╔════════════════════════════════════════╗"
-echo "║      PinkSync Release Creator         ║"
-echo "╚════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════╗"
+echo "║      PinkSync Release Creator           ║"
+echo "╚══════════════════════════════════════════╝"
 echo -e "${NC}"
 
 # Check if on main branch
@@ -149,8 +149,9 @@ $UNRELEASED_CONTENT
 
 EOF
 
-# Append rest of changelog
-tail -n +9 CHANGELOG.md >> changelog.tmp
+# Append rest of changelog (everything after first version entry)
+# Skip header and Unreleased section using pattern matching
+awk '/^## \[[0-9]/{found=1} found' CHANGELOG.md >> changelog.tmp
 mv changelog.tmp CHANGELOG.md
 
 # Update version links at bottom of changelog
@@ -238,9 +239,9 @@ rm -f release-notes.tmp
 
 echo ""
 echo -e "${GREEN}"
-echo "╔════════════════════════════════════════╗"
-echo "║     Release v$NEW_VERSION Created! 🎉       ║"
-echo "╚════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════╗"
+printf "║     Release v%-28s║\n" "$NEW_VERSION Created! 🎉"
+echo "╚══════════════════════════════════════════╝"
 echo -e "${NC}"
 
 echo ""

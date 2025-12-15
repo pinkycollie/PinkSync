@@ -31,9 +31,9 @@ print_error() {
 
 # Banner
 echo -e "${BLUE}"
-echo "╔════════════════════════════════════════╗"
-echo "║   PinkSync Branch Deployment Helper   ║"
-echo "╚════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════╗"
+echo "║   PinkSync Branch Deployment Helper     ║"
+echo "╚══════════════════════════════════════════╝"
 echo -e "${NC}"
 
 # Get current branch

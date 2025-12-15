@@ -69,11 +69,12 @@ Please check CHANGELOG.md for details."
           VERSION="${{ steps.version.outputs.version }}"
           TAG="${{ steps.version.outputs.tag }}"
           PRERELEASE="${{ steps.version.outputs.prerelease }}"
+          RELEASE_DATE=$(date +%Y-%m-%d)
           
-          cat > final-release-notes.md << 'EOF'
+          cat > final-release-notes.md << EOF
           ## PinkSync $TAG
           
-          **Release Date:** $(date +%Y-%m-%d)
+          **Release Date:** $RELEASE_DATE
           **Version:** $VERSION
           EOF
           
@@ -110,13 +111,9 @@ Please check CHANGELOG.md for details."
           echo "" >> final-release-notes.md
           echo "### 🔗 Links" >> final-release-notes.md
           echo "" >> final-release-notes.md
-          echo "- [Full Changelog](https://github.com/pinkycollie/PinkSync/compare/$(git describe --tags --abbrev=0 HEAD^)...$TAG)" >> final-release-notes.md
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "v1.0.0")
+          echo "- [Full Changelog](https://github.com/pinkycollie/PinkSync/compare/$PREV_TAG...$TAG)" >> final-release-notes.md
           echo "- [All Releases](https://github.com/pinkycollie/PinkSync/releases)" >> final-release-notes.md
-          
-          # Replace variables
-          sed -i "s|\$TAG|$TAG|g" final-release-notes.md
-          sed -i "s|\$VERSION|$VERSION|g" final-release-notes.md
-          sed -i "s|PRERELEASE|$PRERELEASE|g" final-release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

@@ -116,13 +116,13 @@ jobs:
           
           # Replace placeholders with error checking
           sed -i "s|\$BRANCH_PATH|$BRANCH|g" next.config.branch.mjs
-          if ! grep -q "$BRANCH" next.config.branch.mjs; then
+          if ! grep -F "$BRANCH" next.config.branch.mjs > /dev/null; then
             echo "Error: Failed to replace BRANCH_PATH placeholder"
             exit 1
           fi
           
           sed -i "s|\$BRANCH_NAME|$BRANCH_NAME|g" next.config.branch.mjs
-          if ! grep -q "$BRANCH_NAME" next.config.branch.mjs; then
+          if ! grep -F "$BRANCH_NAME" next.config.branch.mjs > /dev/null; then
             echo "Error: Failed to replace BRANCH_NAME placeholder"
             exit 1
           fi
