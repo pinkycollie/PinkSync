@@ -43,6 +43,41 @@ Together, they provide seamless accessibility:
 5. **API Broker**: Unified gateway to partner services
 6. **PinkFlow Engine**: Real-time accessibility adjustments
 
+## 🌿 Branch Strategy
+
+PinkSync uses a structured branching model to manage development and deployments:
+
+### Core Branches
+- **`main`** - Primary development branch (modern standard)
+  - Production-ready code
+  - Base for all new features
+  - Auto-deploys to staging
+  
+- **`master`** - Legacy compatibility branch
+  - Mirror of `main` branch
+  - Maintained for backward compatibility
+  
+- **`features`** - Integration testing branch
+  - Pre-production feature integration
+  - Test multiple features together
+
+### Feature Branch Patterns
+Different types of development use specific prefixes:
+- `service-*` - Microservices (e.g., `service-deafauth`)
+- `api-*` - API endpoints (e.g., `api-interpreters`)
+- `feat-*` / `feature-*` - New features (e.g., `feat-video-captions`)
+- `tool-*` - Tools and utilities (e.g., `tool-qr-scanner`)
+- `video-*` - Video processing features
+- `data-*` - Data processing features
+- `admin-*` - Admin interfaces
+
+Each feature branch automatically deploys to its own URL:
+```
+https://pinkycollie.github.io/PinkSync/{branch-name}/
+```
+
+📖 **Detailed Documentation**: See [BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md) for complete branching guidelines and workflows.
+
 ## 🧩 Microservices Ecosystem
 
 PinkSync is built as a comprehensive microservices platform with features distributed across multiple branches. Below is the complete catalog of all services and features available in the PinkSync ecosystem.
