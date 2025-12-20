@@ -232,7 +232,7 @@ This repository underwent a branch restoration to establish standard Git practic
 
 For questions about branching strategy:
 1. Check this document first
-2. Review [BRANCH_DEPLOYMENTS.md](./BRANCH_PAGES_IMPLEMENTATION.md)
+2. Review [BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)
 3. Open an issue with the `question` label
 4. Contact the maintainers
 
