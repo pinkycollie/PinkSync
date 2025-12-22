@@ -4,6 +4,8 @@ PinkSync is a comprehensive Layer 1 accessibility orchestration platform designe
 
 > **🚀 Now powered by Deno!** PinkSync has been migrated from Next.js to Deno for a more lightweight, modern, and efficient runtime. No build step required, native TypeScript support, and significantly faster performance.
 
+> **🎯 NEW: API Hub** - Explore our comprehensive [API Hub](/api-hub) with 9+ Deaf-first APIs, interactive playground, and real-time status monitoring. Perfect for developers building accessible applications. [Learn more →](./API_HUB_README.md)
+
 ## 🎯 Core Concept
 
 PinkSync consists of two primary components working together:
@@ -34,6 +36,7 @@ Together, they provide seamless accessibility:
 - **Web Application**: Embedded and standalone modes
 - **Signal System**: Real-time notifications and alerts
 - **Notificator**: Visual notification engine
+- **API Hub**: Developer portal for Deaf-first APIs
 
 ### Core Systems
 1. **Event Orchestrator**: Node-based event listener architecture
@@ -491,6 +494,7 @@ PinkSync maintains a RAG (Retrieval-Augmented Generation) system that:
 
 ## 📖 Documentation
 
+- [**API Hub**](./API_HUB_README.md) - **NEW!** 🔥 Developer portal with 9+ Deaf-first APIs
 - [Complete Architecture](./docs/architecture-complete.md) - **NEW!** Full system architecture
 - [Branch Deployments Guide](./docs/BRANCH_DEPLOYMENTS.md) - **NEW!** Deploy any branch to GitHub Pages
 - [Deployment URLs Reference](./docs/DEPLOYMENT_URLS.md) - **NEW!** Quick reference for all deployment URLs
