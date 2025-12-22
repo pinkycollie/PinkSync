@@ -1,19 +1,54 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Video, Ear, Hand, Eye, MessageSquare, Users, Shield, Zap, Clock, Globe, ChevronRight, Play, BookOpen, Code, Download, Terminal, CheckCircle, XCircle, AlertCircle, Loader, Send } from 'lucide-react';
+import { Video, Ear, Hand, Eye, MessageSquare, Users, Shield, Zap, Clock, Globe, ChevronRight, Play, BookOpen, Code, Download, Terminal, CheckCircle, XCircle, AlertCircle, Loader, Send, LucideIcon } from 'lucide-react';
 
 // Backend API configuration
 const API_BASE_URL = 'https://api.pinksync.ai/v1';
 
+// Type definitions
+interface APIEndpoint {
+  method: string;
+  path: string;
+  desc: string;
+}
+
+interface DeafAPI {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  description: string;
+  color: string;
+  endpoints: APIEndpoint[];
+  exampleCode: string;
+}
+
+interface PlaygroundResult {
+  success: boolean;
+  data?: {
+    gesture_detected?: string;
+    confidence?: number;
+    timestamp?: string;
+    fibonrose_validated?: boolean;
+    [key: string]: any;
+  };
+  metadata?: {
+    latency_ms?: number;
+    region?: string;
+    processed_by?: string;
+    [key: string]: any;
+  };
+  error?: string;
+}
+
 export default function PinkSyncAPIHub() {
-  const [selectedAPI, setSelectedAPI] = useState<any>(null);
+  const [selectedAPI, setSelectedAPI] = useState<DeafAPI | null>(null);
   const [apiStatus, setApiStatus] = useState<Record<string, {status: string, latency: number}>>({});
   const [playgroundCode, setPlaygroundCode] = useState('');
-  const [playgroundResult, setPlaygroundResult] = useState<any>(null);
+  const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
   const [playgroundLoading, setPlaygroundLoading] = useState(false);
   const [userApiKey, setUserApiKey] = useState('');
-  const [selectedEndpoint, setSelectedEndpoint] = useState<any>(null);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<APIEndpoint | null>(null);
   
   // Simulated API status check (in production, this would hit your backend)
   useEffect(() => {
@@ -82,7 +117,7 @@ export default function PinkSyncAPIHub() {
     }
   };
   
-  const deafAPIs = [
+  const deafAPIs: DeafAPI[] = [
     {
       id: 'asl-recognition',
       name: 'ASL Recognition API',
