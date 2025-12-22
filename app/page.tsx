@@ -90,6 +90,9 @@ export default function HomePage() {
                   {stats.environment}
                 </Badge>
               )}
+              <Link href="/api-hub">
+                <Button variant="outline">API Hub</Button>
+              </Link>
               <Link href="/pinksync">
                 <Button>Launch Demo</Button>
               </Link>
@@ -113,6 +116,11 @@ export default function HomePage() {
             <Link href="/pinksync">
               <Button size="lg" className="bg-gradient-to-r from-pink-600 to-purple-600">
                 Try Demo
+              </Button>
+            </Link>
+            <Link href="/api-hub">
+              <Button size="lg" variant="outline">
+                API Hub
               </Button>
             </Link>
             <Link href="/docs/architecture.md">
@@ -364,6 +372,9 @@ export default function HomePage() {
               © 2025 PinkSync. Built for and with the deaf community.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link href="/api-hub" className="text-sm text-gray-600 hover:text-pink-600">
+                API Hub
+              </Link>
               <Link href="/docs/architecture.md" className="text-sm text-gray-600 hover:text-pink-600">
                 Architecture
               </Link>
