@@ -1,3 +1,4 @@
+[![Copilot code review](https://github.com/pinkycollie/PinkSync/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer/badge.svg)](https://github.com/pinkycollie/PinkSync/actions/workflows/copilot-pull-request-reviewer/copilot-pull-request-reviewer)
 # PinkSync - Accessibility Orchestration Platform
 
 PinkSync is a comprehensive Layer 1 accessibility orchestration platform designed specifically for deaf users. It acts as a unified gateway connecting deaf communities with accessible services, products, and programs while providing real-time accessibility enhancements across multiple environments.
