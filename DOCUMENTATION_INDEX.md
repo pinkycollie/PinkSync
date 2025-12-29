@@ -100,7 +100,23 @@ This repository contains comprehensive documentation for the PinkSync platform, 
 
 ---
 
-### 7. **[/docs Directory](./docs/)**
+### 7. **[BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md)** 🌿
+**Branch management and workflow guide** - **NEW!**
+
+**Contents**:
+- Core branches (main, master, features)
+- Branch naming conventions
+- Feature branch patterns
+- Branch workflow and lifecycle
+- Deployment strategy per branch
+- Best practices and troubleshooting
+- Microservices branch mapping
+
+**Best For**: Understanding Git workflow, creating branches, deployment
+
+---
+
+### 8. **[/docs Directory](./docs/)**
 Additional technical documentation:
 - **[BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Deploy any branch to GitHub Pages
 - **[BRANCH_DEPLOYMENT_EXAMPLES.md](./docs/BRANCH_DEPLOYMENT_EXAMPLES.md)** - **NEW!** Real-world deployment examples
@@ -116,7 +132,7 @@ Additional technical documentation:
 
 ---
 
-### 8. **[CHANGELOG.md](./CHANGELOG.md)** 📝
+### 9. **[CHANGELOG.md](./CHANGELOG.md)** 📝
 **Version history and release notes**
 
 **Contents**:
@@ -130,7 +146,7 @@ Additional technical documentation:
 
 ---
 
-### 9. **[/scripts Directory](./scripts/)**
+### 10. **[/scripts Directory](./scripts/)**
 Helper scripts for development and deployment:
 - **[deploy-branch.sh](./scripts/deploy-branch.sh)** - **NEW!** Interactive branch deployment helper
 - **[create-release.sh](./scripts/create-release.sh)** - **NEW!** Interactive release creation script
@@ -141,17 +157,19 @@ Helper scripts for development and deployment:
 
 ### For New Developers
 1. Start with [README.md](./README.md) - Overview and getting started
-2. Read [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Common commands
-3. Review [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service details
+2. Read [BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md) - **NEW!** Git workflow and branching
+3. Read [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Common commands
+4. Review [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service details
 
 ### For DevOps Engineers
-1. **[docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Branch deployment guide
-2. **[docs/RELEASE_GUIDE.md](./docs/RELEASE_GUIDE.md)** - **NEW!** Release management
-3. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
-4. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
-5. [docs/deployment.md](./docs/deployment.md) - Deployment guide
-6. **[docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** All deployment URLs
-7. **[CHANGELOG.md](./CHANGELOG.md)** - **NEW!** Version history
+1. **[BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md)** - **NEW!** Git workflow and branching strategy
+2. **[docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md)** - **NEW!** Branch deployment guide
+3. **[docs/RELEASE_GUIDE.md](./docs/RELEASE_GUIDE.md)** - **NEW!** Release management
+4. [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) - Service architecture
+5. [MODERN_INTEGRATIONS.md](./MODERN_INTEGRATIONS.md) - Infrastructure tools
+6. [docs/deployment.md](./docs/deployment.md) - Deployment guide
+7. **[docs/DEPLOYMENT_URLS.md](./docs/DEPLOYMENT_URLS.md)** - **NEW!** All deployment URLs
+8. **[CHANGELOG.md](./CHANGELOG.md)** - **NEW!** Version history
 
 ### For Frontend Developers
 1. [README.md](./README.md) - Browser extension section
@@ -192,6 +210,7 @@ Helper scripts for development and deployment:
 ```
 PinkSync/
 ├── README.md                      # Main documentation
+├── BRANCH_STRATEGY.md             # NEW! Branch management guide
 ├── CHANGELOG.md                   # NEW! Version history
 ├── MICROSERVICES_CATALOG.md       # Service catalog
 ├── MODERN_INTEGRATIONS.md         # Integration guide
@@ -238,6 +257,9 @@ PinkSync/
 
 **API Endpoints?**
 → [MICROSERVICES_CATALOG.md](./MICROSERVICES_CATALOG.md) or [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
+
+**Branch Workflow?**
+→ [BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md)
 
 **Deployment Guide?**
 → [docs/BRANCH_DEPLOYMENTS.md](./docs/BRANCH_DEPLOYMENTS.md) (Branch deployments) or [docs/deployment.md](./docs/deployment.md) (General)
