@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinkSync Staging Snapshots</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .snapshot {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .snapshot h2 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .meta {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status.live { background: #10b981; color: white; }
+        .status.staging { background: #f59e0b; color: white; }
+        .status.archived { background: #6b7280; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🎭 PinkSync Staging Snapshots</h1>
+    <p>Compare different versions before production deployment</p>
+    
+    <div class="snapshot">
+        <h2>Current Staging <span class="status live">LIVE</span></h2>
+        <p><a href="https://pinkycollie.github.io/PinkSync/" target="_blank" rel="noopener noreferrer">https://pinkycollie.github.io/PinkSync/</a></p>
+        <p class="meta">Latest build from main branch • Auto-deployed</p>
+    </div>
+    
+    <div class="snapshot">
+        <h2>PR Previews <span class="status staging">PREVIEW</span></h2>
+        <p>Each pull request gets a unique preview URL:</p>
+        <ul>
+            <li><a href="./previews/pr-1/">PR #1 - Initial Setup</a></li>
+            <li><a href="./previews/pr-2/">PR #2 - DeafAuth Integration</a></li>
+            <li>More previews appear automatically when PRs are opened</li>
+        </ul>
+    </div>
+    
+    <div class="snapshot">
+        <h2>Named Snapshots</h2>
+        <p>Manually created snapshots for specific testing:</p>
+        <ul id="snapshot-list">
+            <li><em>No snapshots yet. Create one via GitHub Actions.</em></li>
+        </ul>
+    </div>
+    
+    <hr style="border-color: #333; margin: 2rem 0;">
+    
+    <h3>🚀 Production Environments</h3>
+    <ul>
+        <li><a href="https://sync.mbtq.dev">sync.mbtq.dev</a> - PinkSync Production</li>
+        <li><a href="https://auth.mbtq.dev">auth.mbtq.dev</a> - DeafAuth Production</li>
+        <li><a href="https://360magicians.com">360magicians.com</a> - Business Portal</li>
+        <li><a href="https://vr4deaf.org">vr4deaf.org</a> - VR Portal</li>
+    </ul>
+</body>
+</html>

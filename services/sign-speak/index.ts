@@ -7,7 +7,8 @@
  * - Voice to Sign: Convert speech to sign language in real-time
  */
 
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
+import { env } from '@/lib/env';
 
 export interface SignSpeakRequest {
   id: string;
@@ -33,8 +34,8 @@ class SignSpeakService {
   private apiKey: string;
 
   constructor() {
-    this.apiEndpoint = process.env.SIGN_SPEAK_API_URL || 'https://sign-speak.com/api';
-    this.apiKey = process.env.SIGN_SPEAK_API_KEY || '';
+    this.apiEndpoint = env.get("SIGN_SPEAK_API_URL") || 'https://sign-speak.com/api';
+    this.apiKey = env.get("SIGN_SPEAK_API_KEY") || '';
   }
 
   /**

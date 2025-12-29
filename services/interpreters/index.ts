@@ -5,7 +5,7 @@
  * Connects deaf users with certified sign language interpreters.
  */
 
-import { events } from '@/services/event-orchestrator';
+import { events } from '@/services/event-orchestrator/index.ts';
 
 export interface Interpreter {
   id: string;
