@@ -1,0 +1,22 @@
+name: API Tests
+
+on: [push, pull_request]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Run API tests
+        run: pytest tests/api --junitxml=reports/api-tests.xml
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-results
+          path: reports/api-tests.xml
