@@ -1,0 +1,136 @@
+openapi: 3.1.0
+info:
+  title: PinkSync API
+  version: 1.0.0
+  description: |
+    PinkSync execution engine for DeafAuth-secured, HIPAA-aware, multi-tenant workflows.
+    All requests must include:
+      - DeafAuth token (Authorization header)
+      - Tenant ID (X-Tenant-ID)
+      - Optional Partner ID (X-Partner-ID)
+
+servers:
+  - url: https://api.pinksync.io
+
+components:
+  securitySchemes:
+    DeafAuthToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ExecuteRequest:
+      type: object
+      required: [workflow_id, step_id, payload]
+      properties:
+        workflow_id:
+          type: string
+        step_id:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+
+    ExecuteResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed]
+        output:
+          type: object
+          additionalProperties: true
+        duration_ms:
+          type: integer
+
+    WebhookEvent:
+      type: object
+      required: [workflow_id, step_id, status]
+      properties:
+        workflow_id:
+          type: string
+        step_id:
+          type: string
+        status:
+          type: string
+          enum: [completed, failed]
+        output:
+          type: object
+          nullable: true
+        error:
+          type: object
+          nullable: true
+
+security:
+  - DeafAuthToken: []
+
+paths:
+  /v1/execute/{action}:
+    post:
+      summary: Execute a PinkSync action
+      description: |
+        Executes a PinkSync action such as:
+          - sign_to_text
+          - text_to_sign
+          - asl_overlay
+          - partner_action
+          - gesture_auth
+          - text_simplify
+          - dialect_transform
+
+        Requires:
+          - DeafAuth token
+          - X-Tenant-ID header
+      parameters:
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Partner-ID
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteRequest"
+      responses:
+        "200":
+          description: Action executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecuteResponse"
+        "401":
+          description: Invalid or missing DeafAuth token
+        "403":
+          description: Tenant policy violation (HIPAA, LLM, robots, etc.)
+
+  /webhooks/pinksync:
+    post:
+      summary: Receive async results from PinkSync
+      description: |
+        PinkSync sends asynchronous workflow results to this endpoint.
+        Signed using Svix headers:
+          - svix-id
+          - svix-timestamp
+          - svix-signature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookEvent"
+      responses:
+        "200":
+          description: Webhook received
