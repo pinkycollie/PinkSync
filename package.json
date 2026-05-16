@@ -1,0 +1,30 @@
+{
+  "name": "pinksync-domain-manager",
+  "version": "1.0.0",
+  "description": "Automated domain renewal and Cloudflare integration for pinksync.io",
+  "main": "vercel-cloudflare-domain-manager.js",
+  "scripts": {
+    "renew": "node scripts/renew-domain.js",
+    "verify": "node scripts/renew-domain.js --verify-only",
+    "check": "node vercel-cloudflare-domain-manager.js check",
+    "setup": "node vercel-cloudflare-domain-manager.js setup",
+    "cli": "node vercel-cloudflare-domain-manager.js help"
+  },
+  "keywords": [
+    "pinksync",
+    "vercel",
+    "cloudflare",
+    "domain",
+    "dns",
+    "registrar"
+  ],
+  "author": "PinkSync Team",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
